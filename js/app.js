@@ -158,13 +158,14 @@ const CinemaOS = {
   },
 
   /* ── MODE SWITCHING ────────────────────────────────── */
-  initModes() {
+initModes() {
     document.querySelectorAll('.mode-tab').forEach(btn => {
-      btn.addEventListener('click', () => this.switchMode(+btn.dataset.m));
+        btn.addEventListener('click', () => {
+            console.log("Switching to", btn.dataset.m);
+            this.switchMode(+btn.dataset.m);
+        });
     });
-    const enter = document.getElementById('lv-enter');
-    if (enter) enter.addEventListener('click', e => { e.preventDefault(); this.switchMode(1); });
-  },
+},
 
   switchMode(n) {
     if (n === this.S.mode) return;
