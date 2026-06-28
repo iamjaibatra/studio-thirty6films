@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Studio Thirty6 — Visual production house. Fashion, jewellery, brand and documentary filmmaking. New Delhi.">
+<meta name="theme-color" content="#080808">
+<meta property="og:title" content="Studio Thirty6">
+<meta property="og:description" content="Visual production. Fashion · Jewellery · Brand · Documentary.">
+<meta property="og:type" content="website">
+<title>Studio Thirty6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/modes.css">
+</head>
+<body>
+
+<!-- ── CURSOR ─────────────────────────────────────── -->
+<div id="cur" aria-hidden="true">
+  <div id="cur-ring"></div>
+  <div id="cur-dot"></div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────────── -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<!-- ── SHORTCUTS OVERLAY ──────────────────────────── -->
+<div id="shorts" role="dialog" aria-label="Keyboard Shortcuts" aria-modal="true">
+  <div class="sh-box">
+    <div class="sh-h">Keyboard Shortcuts</div>
+    <div class="sh-grid">
+      <div class="sh-row"><span class="sh-key">1 – 6</span><span class="sh-d">Switch mode</span></div>
+      <div class="sh-row"><span class="sh-key">Space</span><span class="sh-d">Play / Pause</span></div>
+      <div class="sh-row"><span class="sh-key">J K L</span><span class="sh-d">Transport</span></div>
+      <div class="sh-row"><span class="sh-key">← →</span><span class="sh-d">Prev / Next clip</span></div>
+      <div class="sh-row"><span class="sh-key">F</span><span class="sh-d">Fullscreen</span></div>
+      <div class="sh-row"><span class="sh-key">ESC</span><span class="sh-d">Exit / Back</span></div>
+      <div class="sh-row"><span class="sh-key">R</span><span class="sh-d">REC toggle</span></div>
+      <div class="sh-row"><span class="sh-key">H</span><span class="sh-d">Hide UI</span></div>
+      <div class="sh-row"><span class="sh-key">G</span><span class="sh-d">Grain mode</span></div>
+      <div class="sh-row"><span class="sh-key">L</span><span class="sh-d">Light leak</span></div>
+      <div class="sh-row"><span class="sh-key">D</span><span class="sh-d">Director note</span></div>
+      <div class="sh-row"><span class="sh-key">?</span><span class="sh-d">Shortcuts</span></div>
+      <div class="sh-row"><span class="sh-key">Ctrl+S</span><span class="sh-d">Save project</span></div>
+      <div class="sh-row"><span class="sh-key">Tab</span><span class="sh-d">Toggle UI</span></div>
+    </div>
+    <div class="sh-close" id="sh-close" role="button" tabindex="0">Press ESC or ? to close</div>
+  </div>
+</div>
+
+<!-- ── BOOT SEQUENCE ──────────────────────────────── -->
+<div id="boot" aria-label="Camera initialising" role="status">
+  <div class="boot-name">Studio Thirty6 · Cinema OS</div>
+  <div class="boot-seq" id="boot-seq"></div>
+  <div class="boot-rdy" id="boot-rdy">● READY</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     CAMERA SHELL
+════════════════════════════════════════════════ -->
+<div id="cam" role="main">
+
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <span class="tb-logo">Thirty6</span>
+
+    <nav aria-label="Camera modes">
+      <button class="mode-tab on"  data-m="0">Shoot</button>
+      <button class="mode-tab"     data-m="1">Playback</button>
+      <button class="mode-tab"     data-m="2">Archive</button>
+      <button class="mode-tab"     data-m="3">Edit</button>
+      <button class="mode-tab"     data-m="4">Lenses</button>
+      <button class="mode-tab"     data-m="5">Transmit</button>
+    </nav>
+
+    <div class="tb-right">
+      <span class="tb-s" id="tb-tc">00:00:00:00</span>
+      <span class="tb-s">f/<span class="v" id="tb-ap">1.8</span></span>
+      <span class="tb-s">ISO <span class="v" id="tb-iso">3200</span></span>
+      <span class="tb-rec" id="tb-rec" aria-label="Recording indicator">
+        <span class="rec-dot" id="tb-recdot"></span>REC
+      </span>
+    </div>
+  </header>
+
+  <!-- LEFT RAIL -->
+  <aside id="rail-l" aria-label="Camera controls">
+
+    <div class="r-btn" id="rb-peak" role="button" tabindex="0" aria-label="Toggle focus peaking" title="Focus Peaking">
+      <div class="r-btn-i">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <circle cx="6" cy="6" r="4"/>
+          <circle cx="6" cy="6" r="1.5" style="fill:currentColor;stroke:none"/>
+        </svg>
+      </div>
+      <span class="r-lbl">Peak</span>
+    </div>
+
+    <div class="r-btn" id="rb-zebra" role="button" tabindex="0" aria-label="Toggle zebra" title="Zebra">
+      <div class="r-btn-i">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M1 11L11 1M1 7L7 1M5 11L11 5"/>
+        </svg>
+      </div>
+      <span class="r-lbl">Zebra</span>
+    </div>
+
+    <div class="r-btn" id="rb-false" role="button" tabindex="0" aria-label="Toggle false colour" title="False Colour">
+      <div class="r-btn-i">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <rect x="1" y="3" width="3" height="6" style="fill:currentColor;opacity:.3"/>
+          <rect x="4.5" y="3" width="3" height="6" style="fill:currentColor;opacity:.65"/>
+          <rect x="8" y="3" width="3" height="6" style="fill:currentColor"/>
+        </svg>
+      </div>
+      <span class="r-lbl">False</span>
+    </div>
+
+    <div class="r-btn" id="rb-safe" role="button" tabindex="0" aria-label="Toggle safe area" title="Safe Area">
+      <div class="r-btn-i">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <rect x="1" y="1" width="10" height="10"/>
+          <rect x="2.5" y="2.5" width="7" height="7" stroke-dasharray="1.5 1.5"/>
+        </svg>
+      </div>
+      <span class="r-lbl">Safe</span>
+    </div>
+
+    <div class="r-btn" id="rb-rec" role="button" tabindex="0" aria-label="Toggle recording" title="REC" style="margin-top:8px">
+      <div class="r-btn-i" style="border-color:var(--red)">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <circle cx="6" cy="6" r="3.5" style="fill:var(--red);stroke:none"/>
+        </svg>
+      </div>
+      <span class="r-lbl">Rec</span>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT RAIL -->
+  <aside id="rail-r" aria-label="View controls">
+
+    <div class="r-btn" id="rb-hide" role="button" tabindex="0" aria-label="Hide interface" title="Hide UI">
+      <div class="r-btn-i">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <ellipse cx="6" cy="6" rx="5" ry="3.5"/>
+          <circle cx="6" cy="6" r="1.5" style="fill:currentColor;stroke:none"/>
+          <path d="M2 10L10 2"/>
+        </svg>
+      </div>
+      <span class="r-lbl">Hide</span>
+    </div>
+
+    <div class="r-btn" id="rb-sh" role="button" tabindex="0" aria-label="Keyboard shortcuts" title="Shortcuts">
+      <div class="r-btn-i">
+        <svg viewBox="0 0 12 12" aria-hidden="true">
+          <path d="M4.5 4.5a1.5 1.5 0 1 1 3 0c0 1-1.5 1-1.5 2M6 9v.5"/>
+        </svg>
+      </div>
+      <span class="r-lbl">?</span>
+    </div>
+
+  </aside>
+
+  <!-- ── VIEWPORT ────────────────────────────────── -->
+  <div id="vp">
+
+    <!-- ══════════════════════════════════════════
+         PAGE 0 · SHOOT
+    ══════════════════════════════════════════ -->
+    <section class="page on" id="p-shoot" aria-label="Shoot mode — Live View">
+
+      <!-- live image layers -->
+      <div class="lv-img" id="lv-img">
+        <div class="lv-bg"    id="lv-bg"></div>
+        <div class="lv-grain" id="lv-grain"></div>
+        <div class="lv-vign"></div>
+        <div class="lv-overlay lv-false" id="lv-false"  aria-hidden="true"></div>
+        <div class="lv-overlay lv-zebra" id="lv-zebra"  aria-hidden="true"></div>
+        <div class="lv-overlay lv-safe"  id="lv-safe"   aria-hidden="true"></div>
+        <div class="lv-overlay lv-peak"  id="lv-peak"   aria-hidden="true"></div>
+      </div>
+
+      <!-- focus box -->
+      <div class="focus-box" id="focus-box" style="left:50%;top:50%" aria-hidden="true"></div>
+
+      <!-- corner marks -->
+      <div class="lv-hud" aria-hidden="true">
+        <div class="hud-corner tl"></div>
+        <div class="hud-corner tr"></div>
+        <div class="hud-corner bl"></div>
+        <div class="hud-corner br"></div>
+      </div>
+
+      <!-- live HUD -->
+      <div class="lv-hud" id="lv-hud" aria-hidden="true">
+        <div class="hud-top">
+          <!-- left: exposure -->
+          <div class="hud-col">
+            <div class="hs hs-ctrl" id="h-iso" title="Scroll to change ISO">ISO <span class="v">3200</span></div>
+            <div class="hs hs-ctrl" id="h-ap"  title="Scroll to change aperture">f/<span class="v">1.8</span></div>
+            <div class="hs hs-ctrl" id="h-ss"  title="Scroll to change shutter">1/<span class="v">50</span>s</div>
+            <div class="hs hs-ctrl" id="h-wb"  title="Scroll to change white balance">WB <span class="v">5600K</span></div>
+          </div>
+          <!-- centre: REC -->
+          <div class="hud-col c">
+            <div class="hud-rec" id="hud-rec" role="button" title="Toggle recording">
+              <span class="rd"></span>REC
+            </div>
+          </div>
+          <!-- right: system -->
+          <div class="hud-col r">
+            <div class="hs">
+              <div class="bat-row">
+                <div class="bat"><div class="bat-f" style="width:84%"></div></div>
+                <span class="v">84%</span>
+              </div>
+            </div>
+            <div class="hs">4K · <span class="v">24p</span></div>
+            <div class="hs"><span class="v" id="h-lens">50mm</span></div>
+          </div>
+        </div>
+
+        <div class="hud-bot">
+          <!-- left: AF -->
+          <div class="hud-col">
+            <div class="hs">AF <span class="vg">LOCK</span></div>
+          </div>
+          <!-- centre: timecode -->
+          <div class="hud-col c">
+            <div class="hs"><span class="v" id="hud-tc">00:04:17:22</span></div>
+          </div>
+          <!-- right: histogram + scope -->
+          <div class="hud-col r">
+            <div class="hud-hist" id="hud-hist">
+              <div class="hh" style="height:10%"></div>
+              <div class="hh" style="height:22%"></div>
+              <div class="hh" style="height:42%"></div>
+              <div class="hh" style="height:66%"></div>
+              <div class="hh" style="height:84%"></div>
+              <div class="hh" style="height:70%"></div>
+              <div class="hh" style="height:50%"></div>
+              <div class="hh" style="height:30%"></div>
+              <div class="hh" style="height:13%"></div>
+            </div>
+            <div class="hud-scope" id="hud-scope">
+              <div class="sc" style="height:34%"></div>
+              <div class="sc" style="height:52%"></div>
+              <div class="sc" style="height:70%"></div>
+              <div class="sc" style="height:60%"></div>
+              <div class="sc" style="height:46%"></div>
+              <div class="sc" style="height:36%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- hero copy -->
+      <div class="lv-copy">
+        <p class="lv-eye">New Delhi · Est. 2018</p>
+        <h1 class="lv-h1">Visual<strong>Production</strong></h1>
+        <p class="lv-sub">Fashion · Jewellery · Brand · Documentary</p>
+        <a href="#" class="lv-enter" id="lv-enter">Enter Playback →</a>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PAGE 1 · PLAYBACK
+    ══════════════════════════════════════════ -->
+    <section class="page" id="p-play" aria-label="Playback mode">
+
+      <div class="pb-bar">
+        <span class="pb-label on">▶ PLAYBACK</span>
+        <span class="pb-label" style="margin-left:10px" id="pb-count">— CLIPS</span>
+        <div class="pb-filters" id="pb-filters" role="group" aria-label="Filter by category">
+          <button class="pf on" data-f="all">All</button>
+          <button class="pf" data-f="fashion">Fashion</button>
+          <button class="pf" data-f="jewellery">Jewellery</button>
+          <button class="pf" data-f="campaign">Campaign</button>
+          <button class="pf" data-f="film">Film</button>
+          <button class="pf" data-f="social">Social</button>
+        </div>
+      </div>
+
+      <!-- clip grid — built by JS from T36.PROJECTS -->
+      <div class="pb-grid" id="pb-grid" role="list" aria-label="Projects"></div>
+
+      <!-- fullscreen player -->
+      <div id="fp" aria-label="Fullscreen player" role="dialog" aria-modal="true">
+        <div class="fp-scr">
+          <div class="fp-bg" id="fp-bg"></div>
+          <div class="fp-title" id="fp-title"></div>
+        </div>
+        <div class="fp-ctrls">
+          <span class="fp-tc" id="fp-tc">00:00:00</span>
+          <button class="fp-btn" id="fp-prev" aria-label="Previous clip">⏮</button>
+          <button class="fp-btn" id="fp-back" aria-label="Rewind">◀◀</button>
+          <button class="fp-btn" id="fp-play" aria-label="Play" style="color:var(--t1);font-size:15px">▶</button>
+          <button class="fp-btn" id="fp-fwd"  aria-label="Fast forward">▶▶</button>
+          <button class="fp-btn" id="fp-next" aria-label="Next clip">⏭</button>
+          <div class="fp-prog" id="fp-prog" role="progressbar" aria-label="Playback progress">
+            <div class="fp-fill" id="fp-fill"></div>
+          </div>
+          <button class="fp-btn" id="fp-close" aria-label="Close">ESC ✕</button>
+        </div>
+      </div>
+
+      <div class="pb-status">
+        <span class="ps">FILE <span class="v" id="ps-file">001</span></span>
+        <span class="ps">FREE <span class="v">148 GB</span></span>
+        <span class="ps" style="margin-left:auto">
+          SPACE: Play &nbsp;·&nbsp; J/K/L: Transport &nbsp;·&nbsp; F: Fullscreen &nbsp;·&nbsp; ← →: Navigate
+        </span>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PAGE 2 · ARCHIVE
+    ══════════════════════════════════════════ -->
+    <section class="page" id="p-media" aria-label="Archive — production desk">
+
+      <div class="media-tbl">
+        <div class="media-lbl">Production archive · Roll 36</div>
+
+        <!-- contact sheet — built by JS from T36.STUDIO.archive -->
+        <div class="cs-grid" id="cs-grid"></div>
+
+        <!-- desk items — built by JS -->
+        <div class="desk" id="desk-items"></div>
+
+        <!-- clapper board -->
+        <div class="clap">
+          <div class="clap-stks">
+            <div class="cs-s"></div><div class="cs-s"></div>
+            <div class="cs-s"></div><div class="cs-s"></div>
+            <div class="cs-s"></div><div class="cs-s"></div>
+          </div>
+          <div class="clap-fields">
+            <div class="cf"><div class="cf-l">Production</div><div class="cf-v">STUDIO THIRTY6</div></div>
+            <div class="cf"><div class="cf-l">Director</div><div class="cf-v">S. ARORA</div></div>
+            <div class="cf"><div class="cf-l">Scene</div><div class="cf-v">ARCHIVE</div></div>
+            <div class="cf"><div class="cf-l">Take</div><div class="cf-v">36</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- about panel -->
+      <aside class="about-pnl">
+        <div class="ap-lbl">About the studio</div>
+        <h2 class="ap-h">We <strong>observe</strong><br>before we<br>shoot.</h2>
+        <p class="ap-b">Studio Thirty6 is a New Delhi–based visual production house. We work with fashion brands, jewellery houses, and luxury campaigns that demand something beyond a spec sheet.</p>
+        <p class="ap-b">Every project begins with the same question: what does this feel like in the body? The camera follows from that answer — not the other way around.</p>
+        <!-- stats — built by JS from T36.STUDIO.stats -->
+        <div class="ap-stats" id="ap-stats"></div>
+      </aside>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PAGE 3 · EDIT
+    ══════════════════════════════════════════ -->
+    <section class="page" id="p-edit" aria-label="Edit suite">
+
+      <div class="ed-panels">
+
+        <!-- bin — built by JS from T36.STUDIO.process -->
+        <div class="ed-bin">
+          <div class="bin-hdr">Project</div>
+          <div class="bin-list" id="bin-list"></div>
+        </div>
+
+        <!-- preview monitor -->
+        <div class="ed-prev">
+          <div class="ep-scr">
+            <div class="ep-grade">
+              <div class="ep-grade-bg" id="ep-bg"></div>
+            </div>
+            <!-- stages injected by JS -->
+            <div id="ep-stages"></div>
+          </div>
+          <div class="ep-ctrls">
+            <span class="ep-tc" id="ep-tc">00:00:00:00</span>
+            <button class="epc" aria-label="Go to start">⏮</button>
+            <button class="epc" aria-label="Rewind">◀◀</button>
+            <button class="epc" aria-label="Play" style="color:var(--t1);font-size:13px">▶</button>
+            <button class="epc" aria-label="Fast forward">▶▶</button>
+            <button class="epc" aria-label="Go to end">⏭</button>
+            <span class="ep-tc">00:09:24:12</span>
+          </div>
+        </div>
+
+        <!-- inspector / colour grader -->
+        <div class="ed-insp">
+          <div class="insp-tabs">
+            <span class="insp-tab on">Effects</span>
+            <span class="insp-tab">Color</span>
+            <span class="insp-tab">Motion</span>
+          </div>
+          <div class="insp-body">
+            <div class="insp-sec">
+              <div class="insp-sec-h">Color Correction</div>
+              <div class="insp-row"><span class="insp-p">Exposure</span>   <div class="sl-track" data-p="exp" data-v="62"><div class="sl-fill" style="width:62%"><div class="sl-thumb" style="left:62%"></div></div></div></div>
+              <div class="insp-row"><span class="insp-p">Contrast</span>   <div class="sl-track" data-p="con" data-v="55"><div class="sl-fill" style="width:55%"><div class="sl-thumb" style="left:55%"></div></div></div></div>
+              <div class="insp-row"><span class="insp-p">Highlights</span> <div class="sl-track" data-p="hi"  data-v="40"><div class="sl-fill" style="width:40%"><div class="sl-thumb" style="left:40%"></div></div></div></div>
+              <div class="insp-row"><span class="insp-p">Shadows</span>    <div class="sl-track" data-p="sh"  data-v="45"><div class="sl-fill" style="width:45%"><div class="sl-thumb" style="left:45%"></div></div></div></div>
+              <div class="insp-row"><span class="insp-p">Saturation</span> <div class="sl-track" data-p="sat" data-v="48"><div class="sl-fill" style="width:48%"><div class="sl-thumb" style="left:48%"></div></div></div></div>
+              <div class="insp-row"><span class="insp-p">Temperature</span><div class="sl-track" data-p="tmp" data-v="50"><div class="sl-fill" style="width:50%"><div class="sl-thumb" style="left:50%"></div></div></div></div>
+              <div class="insp-row"><span class="insp-p">Grain</span>      <div class="sl-track" data-p="grn" data-v="18"><div class="sl-fill" style="width:18%"><div class="sl-thumb" style="left:18%"></div></div></div></div>
+            </div>
+            <div class="insp-sec">
+              <div class="insp-sec-h">Grade</div>
+              <div class="insp-row"><span class="insp-p">Profile</span><span class="insp-v" style="color:var(--blue-hi)">Log-C → Rec.709</span></div>
+              <div class="insp-row"><span class="insp-p">Intensity</span><div class="sl-track" data-p="lut" data-v="100"><div class="sl-fill" style="width:100%"><div class="sl-thumb" style="left:100%"></div></div></div></div>
+            </div>
+            <div class="insp-sec">
+              <div class="insp-sec-h">Transform</div>
+              <div class="insp-row"><span class="insp-p">Scale</span>    <span class="insp-v">100.0</span></div>
+              <div class="insp-row"><span class="insp-p">Position X</span><span class="insp-v">960.0</span></div>
+              <div class="insp-row"><span class="insp-p">Position Y</span><span class="insp-v">540.0</span></div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /ed-panels -->
+
+      <!-- timeline -->
+      <div class="ed-tl">
+        <div class="tl-tb">
+          <span class="tl-t on">Select</span>
+          <span class="tl-t">Razor</span>
+          <span class="tl-t">Slip</span>
+          <span class="tl-t">Ripple</span>
+          <span class="tl-snap">Snap ON · 100%</span>
+        </div>
+        <div class="tl-body">
+          <div class="tl-hdrs">
+            <div class="tl-hsp"></div>
+            <div class="tl-h"><div class="th-dot" style="background:var(--blue-hi)"></div><span class="th-n">V1</span></div>
+            <div class="tl-h"><div class="th-dot" style="background:var(--blue-hi)"></div><span class="th-n">V2</span></div>
+            <div class="tl-h"><div class="th-dot" style="background:var(--red)"></div>    <span class="th-n">FX</span></div>
+            <div class="tl-h"><div class="th-dot" style="background:var(--green-hi)"></div><span class="th-n">A1</span></div>
+            <div class="tl-h"><div class="th-dot" style="background:var(--purple)"></div> <span class="th-n">MX</span></div>
+          </div>
+          <div class="tl-cnt" id="tl-cnt">
+            <div class="tl-ruler" id="tl-ruler">
+              <div class="tl-rph" id="tl-rph"></div>
+            </div>
+            <div class="tl-rows">
+              <div class="tl-ph" id="tl-ph"></div>
+              <!-- V1 -->
+              <div class="tl-row">
+                <div class="tl-clip c-bl"  style="left:0%;width:18%"  data-i="0"><span class="tc-lbl">Brief · Research</span></div>
+                <div class="tl-clip c-bl2" style="left:19%;width:12%" data-i="2"><span class="tc-lbl">Treatment</span></div>
+                <div class="tl-clip c-bl"  style="left:32%;width:9%"  data-i="3"><span class="tc-lbl">Storyboard</span></div>
+                <div class="tl-clip c-bl2" style="left:42%;width:15%" data-i="4"><span class="tc-lbl">Production</span></div>
+                <div class="tl-clip c-bl"  style="left:58%;width:14%" data-i="5"><span class="tc-lbl">Edit</span></div>
+                <div class="tl-clip c-bl2" style="left:73%;width:10%" data-i="6"><span class="tc-lbl">Grade</span></div>
+                <div class="tl-clip c-bl"  style="left:84%;width:8%"  data-i="8"><span class="tc-lbl">Delivery</span></div>
+              </div>
+              <!-- V2 -->
+              <div class="tl-row">
+                <div class="tl-clip c-ye" style="left:0%;width:5%;height:17px;top:6px"  data-i="0"><span class="tc-lbl">Title</span></div>
+                <div class="tl-clip c-ye" style="left:42%;width:4%;height:17px;top:6px" data-i="4"><span class="tc-lbl">Slate</span></div>
+                <div class="tl-clip c-ye" style="left:88%;width:6%;height:17px;top:6px" data-i="8"><span class="tc-lbl">End</span></div>
+              </div>
+              <!-- FX Grade -->
+              <div class="tl-row">
+                <div class="tl-clip c-or" style="left:0%;width:96%" data-i="6">
+                  <span class="tc-lbl">Grade — Log-C → Rec.709 + Project LUT</span>
+                </div>
+              </div>
+              <!-- A1 Dialogue -->
+              <div class="tl-row">
+                <div class="tl-clip c-gr" style="left:0%;width:26%" data-i="4"><div class="mw" id="mw1"></div></div>
+                <div class="tl-clip c-gr" style="left:42%;width:18%" data-i="5"><div class="mw" id="mw2"></div></div>
+              </div>
+              <!-- MX Music -->
+              <div class="tl-row">
+                <div class="tl-clip c-pu" style="left:0%;width:94%" data-i="0"><div class="mw" id="mw3"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PAGE 4 · LENSES
+    ══════════════════════════════════════════ -->
+    <section class="page" id="p-lens" aria-label="Lens cabinet — services">
+      <div class="lens-top">
+        <h2 class="lens-h">Lens<strong> Cabinet</strong></h2>
+        <p class="lens-s">Hover to focus · Select a service</p>
+      </div>
+      <!-- lens cards — built by JS from T36.SERVICES -->
+      <div class="lens-shelf" id="lens-shelf" role="list"></div>
+    </section>
+
+    <!-- ══════════════════════════════════════════
+         PAGE 5 · TRANSMIT
+    ══════════════════════════════════════════ -->
+    <section class="page" id="p-tx" aria-label="Transmission — contact">
+      <div class="tx-mon">
+
+        <div class="tx-top">
+          <span class="tx-brand">Thirty6 Director Monitor · TX-001</span>
+          <div class="tx-sigs">
+            <span class="tx-sig" id="tx-in">NO SIGNAL</span>
+            <span class="tx-sig" id="tx-res">—</span>
+            <span class="tx-sig live" id="tx-live" style="display:none">
+              <span class="rec-dot live"></span>LIVE
+            </span>
+          </div>
+        </div>
+
+        <div class="tx-scr">
+          <!-- waveform scope -->
+          <div class="tx-scope" aria-hidden="true">
+            <span class="tx-scope-l">WFM</span>
+            <div class="txsb" style="height:22%"></div>
+            <div class="txsb" style="height:40%"></div>
+            <div class="txsb" style="height:60%"></div>
+            <div class="txsb" style="height:74%"></div>
+            <div class="txsb" style="height:54%"></div>
+            <div class="txsb" style="height:44%"></div>
+            <div class="txsb" style="height:64%"></div>
+            <div class="txsb" style="height:34%"></div>
+          </div>
+
+          <!-- no signal state -->
+          <div class="tx-nosig" id="tx-nosig">
+            <div class="nsig-bars" aria-hidden="true">
+              <div class="nsb" style="background:#eee"></div>
+              <div class="nsb" style="background:#e8e800"></div>
+              <div class="nsb" style="background:#00e8e8"></div>
+              <div class="nsb" style="background:#00e800"></div>
+              <div class="nsb" style="background:#e800e8"></div>
+              <div class="nsb" style="background:#e80000"></div>
+              <div class="nsb" style="background:#0000e8"></div>
+            </div>
+            <div class="nsig-l">Touch any field to connect</div>
+          </div>
+
+          <!-- contact form -->
+          <div class="tx-form" id="tx-form">
+            <h2 class="tx-h">Let's make<br>something<br><strong>worth watching.</strong></h2>
+            <div class="txg">
+              <div class="txg-g">
+                <label class="txg-l" for="tx-name">Name</label>
+                <input type="text" class="txg-i" id="tx-name" placeholder="Your name" autocomplete="name">
+              </div>
+              <div class="txg-g">
+                <label class="txg-l" for="tx-email">Email</label>
+                <input type="email" class="txg-i" id="tx-email" placeholder="you@brand.com" autocomplete="email">
+              </div>
+              <div class="txg-g">
+                <label class="txg-l" for="tx-service">Service</label>
+                <select class="txg-s" id="tx-service">
+                  <option value="">Select a lens…</option>
+                  <option value="24mm">24mm — Brand Film</option>
+                  <option value="35mm">35mm — Founder Story</option>
+                  <option value="50mm">50mm — Fashion Campaign</option>
+                  <option value="85mm">85mm — Documentary</option>
+                  <option value="100mm">100mm — Jewellery Film</option>
+                  <option value="70-200mm">70–200mm — Event Coverage</option>
+                </select>
+              </div>
+              <div class="txg-g">
+                <label class="txg-l" for="tx-timeline">Timeline</label>
+                <select class="txg-s" id="tx-timeline">
+                  <option value="">Shoot month…</option>
+                  <option>Within 30 days</option>
+                  <option>1 – 3 months</option>
+                  <option>3 – 6 months</option>
+                  <option>Planning stage</option>
+                </select>
+              </div>
+              <div class="txg-g full">
+                <label class="txg-l" for="tx-brief">Brief</label>
+                <textarea class="txg-t" id="tx-brief" placeholder="Brand, audience, visual tone, deliverables…"></textarea>
+              </div>
+              <div class="tx-actions">
+                <div class="tx-info">
+                  <div><a href="mailto:hello@thirty6films.in">hello@thirty6films.in</a></div>
+                  <div>New Delhi · India</div>
+                </div>
+                <button class="tx-sub" id="tx-sub" type="button">Transmit →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tx-bot">
+          <div class="tx-knobs">
+            <div class="tx-k" title="Brightness"></div>
+            <div class="tx-k" style="transform:rotate(40deg)" title="Contrast"></div>
+            <div class="tx-k" style="transform:rotate(-25deg)" title="Saturation"></div>
+            <div class="tx-k" style="transform:rotate(80deg)" title="Sharpness"></div>
+          </div>
+          <span class="tx-mdl">Thirty6 · TX-001</span>
+          <div class="tx-knobs">
+            <div class="tx-k" title="Volume"></div>
+            <div class="tx-k" style="transform:rotate(-55deg)" title="Input"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- /vp -->
+
+  <!-- BOTTOM BAR -->
+  <footer id="botbar">
+    <span class="bb-s">MODE <span class="v" id="bb-mode">SHOOT</span></span>
+    <span class="bb-tc" id="bb-tc">00:00:00:00</span>
+    <span class="bb-s">ISO <span class="v" id="bb-iso">3200</span></span>
+    <span class="bb-s">f/<span class="v" id="bb-ap">1.8</span></span>
+    <div class="bb-r">
+      <span class="bb-hint">? = shortcuts &nbsp;·&nbsp; 1–6 = modes &nbsp;·&nbsp; H = hide &nbsp;·&nbsp; R = rec</span>
+    </div>
+  </footer>
+
+</div><!-- /cam -->
+
+<!-- ── SCRIPTS ─────────────────────────────────────── -->
+<script src="data/content.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
