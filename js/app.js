@@ -852,12 +852,16 @@ document.addEventListener("click",(e)=>{
     }
 
 });
-document.querySelectorAll(".mode-tab").forEach(tab=>{
+document.querySelectorAll(".mode-tab").forEach(tab => {
 
-    tab.addEventListener("click",()=>{
+    tab.addEventListener("click", () => {
 
-        topNav.classList.remove("open");
-        mobileBtn.classList.remove("open");
+        // Let the original switchMode() run first,
+        // then close the menu.
+        setTimeout(() => {
+            topNav.classList.remove("open");
+            mobileBtn.classList.remove("open");
+        }, 10);
 
     });
 
