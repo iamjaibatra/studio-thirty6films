@@ -825,3 +825,41 @@ const CinemaOS = {
 
 /* ── Global toast shortcut ─────────────────────────── */
 window.T36toast = (msg, dur) => CinemaOS.toast(msg, dur);
+
+const mobileBtn = document.getElementById("mobile-menu-btn");
+const topNav = document.querySelector(".top-nav");
+
+if (mobileBtn && topNav) {
+
+mobileBtn.addEventListener("click", () => {
+
+    topNav.classList.toggle("open");
+
+    mobileBtn.classList.toggle("open");
+
+});
+document.addEventListener("click",(e)=>{
+
+    if(
+        topNav.classList.contains("open") &&
+        !topNav.contains(e.target) &&
+        !mobileBtn.contains(e.target)
+    ){
+
+        topNav.classList.remove("open");
+        mobileBtn.classList.remove("open");
+
+    }
+
+});
+document.querySelectorAll(".mode-tab").forEach(tab=>{
+
+    tab.addEventListener("click",()=>{
+
+        topNav.classList.remove("open");
+        mobileBtn.classList.remove("open");
+
+    });
+
+});
+}

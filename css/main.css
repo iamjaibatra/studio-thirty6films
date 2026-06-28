@@ -486,11 +486,13 @@ body.gleak #vp::after {
     --rail-w:    0px;
   }
   #rail-l, #rail-r { display: none; }
- .mode-tab{
-    font-size:7px;
-    padding:0 5px;
-    letter-spacing:.04em;
+.mode-tab{
+    width:100%;
+    padding:18px 0;
+    text-align:left;
+    font-size:15px;
 }
+
 #topbar{
     display:flex;
     align-items:center;
@@ -503,26 +505,92 @@ body.gleak #vp::after {
     font-size:8px;
 }
   .tb-s, .tb-right { display:none; }
- .top-nav{
-    display:none;
+.top-nav{
+    display:flex;
+
+    position:fixed;
+    top:0;
+    right:-100%;
+
+    width:280px;
+    height:100vh;
+
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+
+    padding:90px 32px;
+
+    background:#0b0b0b;
+
+    border-left:1px solid rgba(255,255,255,.08);
+
+    transition:right .4s ease;
+
+    z-index:998;
 }
 
+.top-nav.open{
+    right:0;
+}
 #mobile-menu-btn{
+
     display:flex;
-    align-items:center;
-    justify-content:center;
+
+    width:44px;
+    height:44px;
 
     margin-left:auto;
 
-    width:40px;
-    height:var(--shell-top);
-
     background:none;
     border:none;
-    color:var(--t1);
 
-    font-size:22px;
     cursor:pointer;
+
+    position:relative;
+    z-index:1001;
+
+    justify-content:center;
+    align-items:center;
+
+}
+
+#mobile-menu-btn span{
+
+    position:absolute;
+
+    width:22px;
+    height:2px;
+
+    background:var(--t1);
+
+    transition:.35s ease;
+
+}
+
+#mobile-menu-btn span:nth-child(1){
+    transform:translateY(-5px);
+}
+
+#mobile-menu-btn span:nth-child(2){
+    opacity:1;
+}
+
+#mobile-menu-btn span:nth-child(3){
+    transform:translateY(5px);
+}
+#mobile-menu-btn.open span:nth-child(1){
+    transform: translateY(0) rotate(45deg);
+}
+
+#mobile-menu-btn.open span:nth-child(2){
+
+    opacity:0;
+
+}
+
+#mobile-menu-btn.open span:nth-child(3){
+    transform: translateY(0) rotate(-45deg);
 }
 
 .tb-right.mobile-show{
@@ -533,10 +601,6 @@ body.gleak #vp::after {
   #vp { grid-column: 1/-1; }
   body { cursor: auto; }
   #cur { display: none; }
-}
-
-@media (max-width: 480px) {
-  .mode-tab:not(.on):not([data-m="0"]):not([data-m="1"]) { display: none; }
 }
 
 /* ── REDUCED MOTION ─────────────────────────────────── */

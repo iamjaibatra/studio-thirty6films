@@ -53,7 +53,7 @@ thirty6/
   video: '/assets/clip.mp4', // set when real footage is ready
   poster: '/assets/clip.jpg',
   lens: '50mm',
-  camera: 'Thirty6 OS · FX-1',
+  camera: 'Studio Thirty6 OS · FX-1',
   fps: '24p',
   duration: '03:24',
   codec: 'Log-C 4K',
