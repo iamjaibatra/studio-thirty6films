@@ -167,8 +167,12 @@ initModes() {
 
         if (window.innerWidth <= 768) {
 
-            topNav.classList.remove("open");
-            mobileBtn.classList.remove("open");
+    const topNav = document.querySelector(".top-nav");
+    const mobileBtn = document.getElementById("mobile-menu-btn");
+
+    topNav?.classList.remove("open");
+    mobileBtn?.classList.remove("open");
+
 
         }
 
