@@ -159,12 +159,22 @@ const CinemaOS = {
 
   /* ── MODE SWITCHING ────────────────────────────────── */
 initModes() {
-    document.querySelectorAll('.mode-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-            console.log("Switching to", btn.dataset.m);
-            this.switchMode(+btn.dataset.m);
-        });
+ document.querySelectorAll('.mode-tab').forEach(btn => {
+
+    btn.addEventListener('click', () => {
+
+        this.switchMode(+btn.dataset.m);
+
+        if (window.innerWidth <= 768) {
+
+            topNav.classList.remove("open");
+            mobileBtn.classList.remove("open");
+
+        }
+
     });
+
+});
 },
 
   switchMode(n) {
@@ -851,20 +861,6 @@ document.addEventListener("click",(e)=>{
         mobileBtn.classList.remove("open");
 
     }
-
-});
-document.querySelectorAll(".mode-tab").forEach(tab => {
-
-    tab.addEventListener("click", () => {
-
-        // Let the original switchMode() run first,
-        // then close the menu.
-        setTimeout(() => {
-            topNav.classList.remove("open");
-            mobileBtn.classList.remove("open");
-        }, 10);
-
-    });
 
 });
 }
