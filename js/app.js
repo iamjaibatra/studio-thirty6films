@@ -180,10 +180,20 @@ initModes() {
   switchMode(n) {
     if (n === this.S.mode) return;
     this.S.mode = n;
-    this.PAGE_IDS.forEach((id,i) => {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('on', i === n);
-    });
+   this.PAGE_IDS.forEach((id, i) => {
+    const el = document.getElementById(id);
+
+    if (!el) return;
+
+    console.log(id, i, n);
+
+    if (i === n) {
+        el.classList.add("on");
+    } else {
+        el.classList.remove("on");
+    }
+});
+console.log("Visible page:", document.querySelector(".page.on")?.id);
     document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('on', +b.dataset.m === n));
     const bbMode = document.getElementById('bb-mode');
     if (bbMode) bbMode.textContent = this.MODES[n];
