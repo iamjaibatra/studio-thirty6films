@@ -481,7 +481,18 @@ body.gleak #vp::after {
     --rail-w:    0px;
   }
   #rail-l, #rail-r { display: none; }
-  .mode-tab { font-size:7px; padding:0 8px; letter-spacing:.06em; }
+ .mode-tab{
+    font-size:7px;
+    padding:0 5px;
+    letter-spacing:.04em;
+}
+#topbar{
+    padding:0 8px;
+}
+.tb-logo{
+    margin-right:10px;
+    font-size:8px;
+}
   .tb-s, .tb-right { display:none; }
   .tb-right.mobile-show { display:flex; }
   .lv-h1 { font-size: clamp(38px, 10vw, 64px); }
