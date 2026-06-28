@@ -237,13 +237,13 @@ T36.SERVICES = [
 /* ── STUDIO INFO ────────────────────────────────────── */
 T36.STUDIO = {
   name: 'Studio Thirty6',
-  director: 'Saurabh Arora',
+  director: 'Gimmy Kohli',
   location: 'New Delhi, India',
   founded: 2018,
-  email: 'hello@thirty6films.in',
-  instagram: 'https://instagram.com/thirty6films',
-  vimeo: 'https://vimeo.com/thirty6films',
-  phone: null, // add when ready
+  email: 'hello@studiothirty6.com',
+  instagram: 'https://instagram.com/studiothirty6_films',
+  vimeo: 'https://vimeo.com/user50115456',
+  phone: '+91 9999221822',
 
   // Stats — update as portfolio grows
   stats: [
