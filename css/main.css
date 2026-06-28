@@ -183,6 +183,16 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
   display: flex; align-items: center;
   padding: 0 14px; gap: 0; z-index: 100;
 }
+.top-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+}
 .tb-logo {
   font-family:'JetBrains Mono',monospace; font-size:9px;
   letter-spacing:.22em; color:var(--t3); text-transform:uppercase;
@@ -489,4 +499,3 @@ body.gleak #vp::after {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition-duration: .01ms !important; }
 }
-/* test */
