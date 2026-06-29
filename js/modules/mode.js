@@ -1,16 +1,6 @@
 export function initModes(app) {
   document.querySelectorAll('.mode-tab').forEach(btn => {
-    let suppressNextClick = false;
-    const activate = event => {
-      event.stopPropagation();
-
-      if (event.type === 'touchend') {
-        suppressNextClick = true;
-      } else if (event.type === 'click' && suppressNextClick) {
-        suppressNextClick = false;
-        return;
-      }
-
+    btn.addEventListener('click', () => {
       app.switchMode(Number(btn.dataset.m));
 
       if (window.innerWidth <= 768) {
@@ -20,10 +10,7 @@ export function initModes(app) {
         mobileBtn?.classList.remove('open');
         mobileBtn?.setAttribute('aria-expanded', 'false');
       }
-    };
-
-    btn.addEventListener('touchend', activate, { passive: true });
-    btn.addEventListener('click', activate, { passive: true });
+    });
   });
 }
 

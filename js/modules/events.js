@@ -1,22 +1,23 @@
-export function bindInteractiveHandlers(root = document) {
-  const activate = element => {
-    if (!element || element.dataset.bound === 'true') return;
-    element.dataset.bound = 'true';
+export function initMobileInteractions() {
+  const selector = 'button, a[href], [role="button"], .mode-tab, .r-btn, .pf, .fp-btn, .epc, .sh-close, .lv-enter';
+  let suppressNextClick = false;
 
-    const trigger = event => {
-      if (event.type === 'click' && event.detail === 0) return;
-      if (event.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
-      if (event.type === 'pointerup' && event.button !== 0) return;
+  document.addEventListener('touchend', event => {
+    const target = event.target.closest(selector);
+    if (!target) return;
 
-      if (typeof element.click === 'function' && !element.hasAttribute('data-manual')) {
-        element.click();
-      }
-    };
+    event.preventDefault();
+    event.stopPropagation();
+    suppressNextClick = true;
+    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, composed: true }));
+  }, { passive: false });
 
-    element.addEventListener('pointerup', trigger, { passive: false });
-    element.addEventListener('click', trigger, { passive: false });
-    element.addEventListener('keydown', trigger, { passive: false });
-  };
-
-  root.querySelectorAll('button, a, [role="button"], .mode-tab, .r-btn, .pf, .fp-btn, .epc, .sh-close, .lv-enter').forEach(activate);
+  document.addEventListener('click', event => {
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+  }, true);
 }

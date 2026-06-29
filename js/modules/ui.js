@@ -102,21 +102,11 @@ export function initMobileNav(app) {
     }
   };
 
-  const activateMenu = event => {
+  mobileBtn.addEventListener('click', event => {
+    event.preventDefault();
     event.stopPropagation();
-
-    if (event.type === 'touchend') {
-      suppressNextClick = true;
-    } else if (event.type === 'click' && suppressNextClick) {
-      suppressNextClick = false;
-      return;
-    }
-
     toggleMenu(event);
-  };
-
-  mobileBtn.addEventListener('touchend', activateMenu, { passive: true });
-  mobileBtn.addEventListener('click', activateMenu, { passive: true });
+  }, { passive: false });
 
   document.addEventListener('click', e => {
     if (suppressNextClick) {

@@ -16,6 +16,7 @@ import { buildLenses } from './modules/lenses.js';
 import { initTransmit, initScopes } from './modules/transmit.js';
 import { initShortcuts, toggleUI, toggleShortcuts, toggleNight, toggleAnamorphic, toggleGrain, initMobileNav, initRail } from './modules/ui.js';
 import { initKeyboard } from './modules/keyboard.js';
+import { initMobileInteractions } from './modules/events.js';
 
 const CinemaOS = {
   S: createAppState(),
@@ -47,6 +48,7 @@ const CinemaOS = {
     this.initScopes();
     this.initResize();
     this.initMobileNav();
+    initMobileInteractions();
   },
 
   /* ── BOOT ──────────────────────────────────────────── */
