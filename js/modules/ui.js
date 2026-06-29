@@ -73,8 +73,6 @@ export function initMobileNav(app) {
   const topNav = document.querySelector('.top-nav');
   if (!mobileBtn || !topNav) return;
 
-  let suppressNextClick = false;
-
   const closeMenu = () => {
     topNav.classList.remove('open');
     mobileBtn.classList.remove('open');
@@ -88,10 +86,6 @@ export function initMobileNav(app) {
   };
 
   const toggleMenu = (event) => {
-    if (event.type === 'touchend') {
-      suppressNextClick = true;
-    }
-
     event.preventDefault();
     event.stopPropagation();
 
@@ -102,14 +96,17 @@ export function initMobileNav(app) {
     }
   };
 
-  mobileBtn.addEventListener('click', event => {
-    if (suppressNextClick) {
-      suppressNextClick = false;
-      return;
-    }
+  mobileBtn.addEventListener('touchend', event => {
+    event.preventDefault();
+    event.stopPropagation();
     toggleMenu(event);
   }, { passive: false });
-  mobileBtn.addEventListener('touchend', toggleMenu, { passive: false });
+
+  mobileBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleMenu(event);
+  }, { passive: false });
 
   document.addEventListener('click', e => {
     if (!topNav.classList.contains('open')) return;
