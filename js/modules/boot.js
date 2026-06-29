@@ -24,7 +24,6 @@ export function bootApp(app) {
       rdyEl.style.opacity = '1';
       setTimeout(() => {
         bootEl.classList.add('out');
-        bootEl.style.pointerEvents = 'none';
         bootEl.style.zIndex = '0';
         camEl?.classList.add('on');
         setTimeout(() => {
