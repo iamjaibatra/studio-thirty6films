@@ -41,6 +41,27 @@ export function initShoot(app) {
     });
   }
 
+  const lvEnter = document.getElementById('lv-enter');
+  if (lvEnter) {
+    const goPlayback = event => {
+      event.preventDefault();
+      event.stopPropagation();
+      app.switchMode(1);
+
+      if (window.innerWidth <= 768) {
+        const topNav = document.querySelector('.top-nav');
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        topNav?.classList.remove('open');
+        mobileBtn?.classList.remove('open');
+        mobileBtn?.setAttribute('aria-expanded', 'false');
+      }
+    };
+
+    lvEnter.addEventListener('pointerup', goPlayback, { passive: false });
+    lvEnter.addEventListener('touchend', goPlayback, { passive: false });
+    lvEnter.addEventListener('click', goPlayback, { passive: false });
+  }
+
   const bindScroll = (id, arr, get, set, render) => {
     const el = document.getElementById(id);
     if (!el) return;

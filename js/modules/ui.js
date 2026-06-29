@@ -102,7 +102,7 @@ export function initMobileNav(app) {
     }
   };
 
-  mobileBtn.addEventListener('pointerup', event => {
+  const activateMenu = event => {
     event.preventDefault();
     event.stopPropagation();
     if (suppressNextClick) {
@@ -110,7 +110,10 @@ export function initMobileNav(app) {
       return;
     }
     toggleMenu(event);
-  }, { passive: false });
+  };
+
+  mobileBtn.addEventListener('pointerup', activateMenu, { passive: false });
+  mobileBtn.addEventListener('touchend', activateMenu, { passive: false });
   mobileBtn.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
