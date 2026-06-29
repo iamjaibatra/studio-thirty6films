@@ -74,27 +74,6 @@ export function initMobileNav(app) {
   if (!mobileBtn || !topNav) return;
 
   let suppressNextClick = false;
-  let lastTapTarget = null;
-  let lastTapTime = 0;
-
-  const handleTouchTap = event => {
-    const interactive = event.target.closest('button, a, [role="button"], .r-btn, .mode-tab, .pf, .fp-btn, .epc, .sh-close');
-    if (!interactive) return;
-
-    const now = Date.now();
-    if (lastTapTarget === interactive && now - lastTapTime < 500) {
-      lastTapTarget = null;
-      lastTapTime = 0;
-      return;
-    }
-
-    lastTapTarget = interactive;
-    lastTapTime = now;
-    suppressNextClick = true;
-    event.preventDefault();
-    event.stopPropagation();
-    interactive.click();
-  };
 
   const closeMenu = () => {
     topNav.classList.remove('open');
@@ -132,7 +111,6 @@ export function initMobileNav(app) {
   }, { passive: false });
   mobileBtn.addEventListener('touchend', toggleMenu, { passive: false });
 
-  document.addEventListener('touchend', handleTouchTap, { passive: false });
   document.addEventListener('click', e => {
     if (suppressNextClick) {
       suppressNextClick = false;

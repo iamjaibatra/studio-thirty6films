@@ -49,6 +49,7 @@ button, a, [role="button"], input, select, textarea {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  pointer-events: auto;
 }
 input, select, textarea { cursor: none; }
 a { cursor: none; }
