@@ -37,6 +37,7 @@ body {
   -webkit-user-select: none;
   user-select: none;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 button { font: inherit; border: none; background: none; cursor: none; }
 input, select, textarea { font: inherit; cursor: none; }
@@ -511,6 +512,7 @@ body.gleak #vp::after {
     position:fixed;
     top:0;
     right:-100%;
+    overscroll-behavior: contain;
 
     width:280px;
     height:100vh;
@@ -552,6 +554,8 @@ body.gleak #vp::after {
 
     justify-content:center;
     align-items:center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 
 }
 

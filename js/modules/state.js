@@ -1,0 +1,28 @@
+export function createAppState() {
+  return {
+    mode: 0,
+    rec: false,
+    focusLocked: false,
+    iso: 3200,
+    ap: 1.8,
+    ss: 50,
+    wb: 5600,
+    playClip: null,
+    playing: false,
+    playProg: 0,
+    playTimer: null,
+    editStage: 0,
+    tlPct: 22,
+    tlDrag: false,
+    monOn: false,
+    uiHidden: false,
+    hudHidden: false,
+    night: false,
+    anamorphic: false,
+    gleak: false,
+    grain: false,
+    konamiIdx: 0,
+    cinemaBuf: '',
+    isMobile: window.innerWidth <= 768,
+  };
+}
