@@ -2,6 +2,13 @@ export function initPlayback(app) {
   const grid = document.getElementById('pb-grid');
   if (!grid || !window.T36?.PROJECTS) return;
 
+  const scheduleIdle = callback => {
+    if (typeof window.requestIdleCallback === 'function') {
+      return window.requestIdleCallback(callback);
+    }
+    return window.setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 50 }), 0);
+  };
+
   window.T36.PROJECTS.forEach((p, i) => {
     const d = document.createElement('div');
     d.className = `clip ${p.still}`;
@@ -30,15 +37,21 @@ export function initPlayback(app) {
       vid.preload = 'none';
       d.appendChild(vid);
 
-      const io = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            vid.preload = 'metadata';
-            io.unobserve(d);
-          }
-        });
-      }, { rootMargin: '200px' });
-      io.observe(d);
+      const io = typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                vid.preload = 'metadata';
+                io.unobserve(d);
+              }
+            });
+          }, { rootMargin: '200px' })
+        : null;
+      if (io) {
+        io.observe(d);
+      } else {
+        vid.preload = 'metadata';
+      }
 
       d.addEventListener('mouseenter', () => {
         vid.play().catch(() => {});
@@ -49,7 +62,7 @@ export function initPlayback(app) {
       });
     }
 
-    requestIdleCallback(() => {
+    scheduleIdle(() => {
       const wv = document.getElementById(`cw${i}`);
       if (!wv) return;
       const frag = document.createDocumentFragment();
