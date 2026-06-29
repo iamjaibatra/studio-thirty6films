@@ -158,49 +158,42 @@ const CinemaOS = {
   },
 
   /* ── MODE SWITCHING ────────────────────────────────── */
-initModes() {
- document.querySelectorAll('.mode-tab').forEach(btn => {
-
-    btn.addEventListener('click', () => {
-
+  initModes() {
+    document.querySelectorAll('.mode-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
         this.switchMode(+btn.dataset.m);
 
         if (window.innerWidth <= 768) {
-
-    const topNav = document.querySelector(".top-nav");
-    const mobileBtn = document.getElementById("mobile-menu-btn");
-
-    topNav?.classList.remove("open");
-    mobileBtn?.classList.remove("open");
-
-
+          const topNav = document.querySelector('.top-nav');
+          const mobileBtn = document.getElementById('mobile-menu-btn');
+          topNav?.classList.remove('open');
+          mobileBtn?.classList.remove('open');
         }
-
+      });
     });
-
-});
-},
+  },
 
   switchMode(n) {
     if (n === this.S.mode) return;
+
     this.S.mode = n;
-   this.PAGE_IDS.forEach((id, i) => {
-    const el = document.getElementById(id);
 
-    if (!el) return;
+    this.PAGE_IDS.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.toggle('on', i === n);
+      }
+    });
 
-    console.log(id, i, n);
+    document.querySelectorAll('.mode-tab').forEach(btn => {
+      btn.classList.toggle('on', +btn.dataset.m === n);
+    });
 
-    if (i === n) {
-        el.classList.add("on");
-    } else {
-        el.classList.remove("on");
-    }
-});
-console.log("Visible page:", document.querySelector(".page.on")?.id);
-    document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('on', +b.dataset.m === n));
     const bbMode = document.getElementById('bb-mode');
-    if (bbMode) bbMode.textContent = this.MODES[n];
+    if (bbMode) {
+      bbMode.textContent = this.MODES[n];
+    }
+
     this.toast(this.MODES[n]);
   },
 
