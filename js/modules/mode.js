@@ -1,6 +1,8 @@
 export function initModes(app) {
   document.querySelectorAll('.mode-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('pointerup', event => {
+      event.preventDefault();
+      event.stopPropagation();
       app.switchMode(Number(btn.dataset.m));
 
       if (window.innerWidth <= 768) {
@@ -10,6 +12,10 @@ export function initModes(app) {
         mobileBtn?.classList.remove('open');
         mobileBtn?.setAttribute('aria-expanded', 'false');
       }
+    });
+    btn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
     });
   });
 }

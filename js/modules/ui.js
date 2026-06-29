@@ -102,14 +102,19 @@ export function initMobileNav(app) {
     }
   };
 
-  mobileBtn.addEventListener('click', event => {
+  mobileBtn.addEventListener('pointerup', event => {
+    event.preventDefault();
+    event.stopPropagation();
     if (suppressNextClick) {
       suppressNextClick = false;
       return;
     }
     toggleMenu(event);
   }, { passive: false });
-  mobileBtn.addEventListener('touchend', toggleMenu, { passive: false });
+  mobileBtn.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+  }, { passive: false });
 
   document.addEventListener('click', e => {
     if (suppressNextClick) {
