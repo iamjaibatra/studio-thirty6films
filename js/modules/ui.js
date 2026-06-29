@@ -103,21 +103,20 @@ export function initMobileNav(app) {
   };
 
   const activateMenu = event => {
-    event.preventDefault();
     event.stopPropagation();
-    if (suppressNextClick) {
+
+    if (event.type === 'touchend') {
+      suppressNextClick = true;
+    } else if (event.type === 'click' && suppressNextClick) {
       suppressNextClick = false;
       return;
     }
+
     toggleMenu(event);
   };
 
-  mobileBtn.addEventListener('pointerup', activateMenu, { passive: false });
-  mobileBtn.addEventListener('touchend', activateMenu, { passive: false });
-  mobileBtn.addEventListener('click', event => {
-    event.preventDefault();
-    event.stopPropagation();
-  }, { passive: false });
+  mobileBtn.addEventListener('touchend', activateMenu, { passive: true });
+  mobileBtn.addEventListener('click', activateMenu, { passive: true });
 
   document.addEventListener('click', e => {
     if (suppressNextClick) {

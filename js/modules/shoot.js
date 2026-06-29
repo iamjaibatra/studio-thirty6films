@@ -43,9 +43,17 @@ export function initShoot(app) {
 
   const lvEnter = document.getElementById('lv-enter');
   if (lvEnter) {
+    let suppressNextClick = false;
     const goPlayback = event => {
-      event.preventDefault();
       event.stopPropagation();
+
+      if (event.type === 'touchend') {
+        suppressNextClick = true;
+      } else if (event.type === 'click' && suppressNextClick) {
+        suppressNextClick = false;
+        return;
+      }
+
       app.switchMode(1);
 
       if (window.innerWidth <= 768) {
@@ -57,9 +65,8 @@ export function initShoot(app) {
       }
     };
 
-    lvEnter.addEventListener('pointerup', goPlayback, { passive: false });
-    lvEnter.addEventListener('touchend', goPlayback, { passive: false });
-    lvEnter.addEventListener('click', goPlayback, { passive: false });
+    lvEnter.addEventListener('touchend', goPlayback, { passive: true });
+    lvEnter.addEventListener('click', goPlayback, { passive: true });
   }
 
   const bindScroll = (id, arr, get, set, render) => {

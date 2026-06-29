@@ -1,8 +1,16 @@
 export function initModes(app) {
   document.querySelectorAll('.mode-tab').forEach(btn => {
+    let suppressNextClick = false;
     const activate = event => {
-      event.preventDefault();
       event.stopPropagation();
+
+      if (event.type === 'touchend') {
+        suppressNextClick = true;
+      } else if (event.type === 'click' && suppressNextClick) {
+        suppressNextClick = false;
+        return;
+      }
+
       app.switchMode(Number(btn.dataset.m));
 
       if (window.innerWidth <= 768) {
@@ -14,9 +22,8 @@ export function initModes(app) {
       }
     };
 
-    btn.addEventListener('pointerup', activate, { passive: false });
-    btn.addEventListener('touchend', activate, { passive: false });
-    btn.addEventListener('click', activate, { passive: false });
+    btn.addEventListener('touchend', activate, { passive: true });
+    btn.addEventListener('click', activate, { passive: true });
   });
 }
 
