@@ -114,7 +114,7 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
 #boot {
   position: fixed; inset: 0;
   background: #040404;
-  z-index: 9990;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -184,6 +184,8 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
   grid-template-columns: var(--rail-w) 1fr var(--rail-w);
   opacity: 0;
   transition: opacity .5s;
+  z-index: 2;
+  pointer-events: auto;
 }
 #cam.on { opacity: 1; }
 
