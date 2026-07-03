@@ -66,7 +66,10 @@
   <header id="topbar">
     <span class="tb-logo">Studio Thirty6</span>
 
-    <nav class="top-nav" aria-label="Camera modes">
+    <!-- .top-nav lives here on desktop (normal flow).
+         On mobile it becomes position:fixed and is visually
+         independent of the grid stacking context. -->
+    <nav class="top-nav" id="top-nav" aria-label="Camera modes" role="navigation">
       <button class="mode-tab on"  data-m="0">Shoot</button>
       <button class="mode-tab"     data-m="1">Playback</button>
       <button class="mode-tab"     data-m="2">Archive</button>
@@ -74,11 +77,16 @@
       <button class="mode-tab"     data-m="4">Lenses</button>
       <button class="mode-tab"     data-m="5">Transmit</button>
     </nav>
-  <button id="mobile-menu-btn" aria-label="Open menu">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
+
+    <!-- Hamburger — stays in topbar flow on all breakpoints -->
+    <button id="mobile-menu-btn"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="top-nav">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
 
     <div class="tb-right">
       <span class="tb-s" id="tb-tc">00:00:00:00</span>
@@ -267,7 +275,7 @@
         <p class="lv-eye">New Delhi · Est. 2018</p>
         <h1 class="lv-h1">Visual<strong>Production</strong></h1>
         <p class="lv-sub">Fashion · Jewellery · Brand · Documentary</p>
-        <button type="button" class="lv-enter" id="lv-enter">Enter Playback →</button>
+        <a href="#" class="lv-enter" id="lv-enter">Enter Playback →</a>
       </div>
 
     </section>

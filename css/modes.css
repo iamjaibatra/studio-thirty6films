@@ -309,7 +309,7 @@
 .tx-scope { position:absolute; top:12px; right:12px; width:60px; height:40px; background:#030303; border:1px solid #161616; display:flex; align-items:flex-end; gap:1px; padding:1px 2px 0; }
 .tx-scope-l { position:absolute; top:2px; left:3px; font-family:'JetBrains Mono',monospace; font-size:5.5px; color:var(--green-hi); opacity:.38; letter-spacing:.04em; }
 .txsb { flex:1; background:var(--green-hi); opacity:.32; transition:height .5s; }
-.tx-nosig { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:#060606; transition:opacity .32s; z-index:2; cursor:none; }
+.tx-nosig { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:#060606; transition:opacity .32s; z-index:2; cursor:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 .tx-nosig.gone { opacity:0; pointer-events:none; }
 .nsig-bars { display:flex; gap:2px; margin-bottom:4px; }
 .nsb  { height:48px; width:22px; border-radius:0; }
@@ -331,7 +331,7 @@
 .tx-info { font-family:'JetBrains Mono',monospace; font-size:7.5px; color:var(--t3); letter-spacing:.05em; line-height:2; }
 .tx-info a { color:var(--t2); text-decoration:none; transition:color .14s; cursor:none; }
 .tx-info a:hover { color:var(--t1); }
-.tx-sub { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; background:var(--red); color:#f4f4f4; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; border:none; cursor:none; transition:opacity .14s; }
+.tx-sub { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; background:var(--red); color:#f4f4f4; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; border:none; cursor:none; transition:opacity .14s; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 .tx-sub:hover { opacity:.85; }
 .tx-sub:active { transform:scale(.97); }
 .tx-bot { height:36px; background:#0b0b0b; border:1px solid var(--line2); border-top:none; display:flex; align-items:center; padding:0 13px; justify-content:space-between; }
@@ -358,4 +358,31 @@
   .pb-grid { grid-template-columns:repeat(2,1fr); }
   .cs-grid { grid-template-columns:repeat(2,1fr); }
   .lens-shelf { grid-template-columns:1fr; overflow-y:auto; }
+}
+
+/* ── MOBILE: override cursor:none on interactive transmit elements ── */
+@media (max-width: 768px) {
+  /* iOS Safari requires cursor:pointer for click events to fire
+     reliably on non-anchor elements. cursor:none suppresses taps. */
+  .tx-nosig,
+  .tx-sub,
+  .txg-i,
+  .txg-s,
+  .txg-t,
+  .tx-k,
+  .tx-info a,
+  .fp-btn,
+  .epc,
+  .pf,
+  .neg,
+  .clip,
+  .bin-row,
+  .insp-tab,
+  .sl-track,
+  .tl-t,
+  .lens-card {
+    cursor: pointer !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
