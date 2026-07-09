@@ -1,174 +1,22 @@
 /**
  * STUDIO THIRTY6 — CONTENT LAYER
  * ─────────────────────────────────────────────────────
- * Edit this file to update all site content.
- * No code changes needed to add/remove projects or services.
- *
- * To add a new project:
- *   1. Add an object to PROJECTS array below.
- *   2. Add a matching CSS class (e.g. ".s9") to css/stills.css
- *      — or drop a real <video> src in the "video" field.
- *   Done. The site rebuilds itself automatically.
+ * Edit this file to update site copy (services, studio info, boot
+ * messages). Projects are no longer edited here — add/edit/publish
+ * them from the Studio Thirty6 OS CMS; this site fetches published
+ * projects live from Supabase at load time (js/modules/data-loader.js).
  * ─────────────────────────────────────────────────────
  */
 
 window.T36 = window.T36 || {};
 
-/* ── PROJECTS ───────────────────────────────────────── */
-T36.PROJECTS = [
-  {
-    id: 1,
-    slug: 'goldmine',
-    title: 'Goldmine',
-    subtitle: 'Jewellery Campaign',
-    client: 'Goldmine Jewels',
-    category: 'jewellery',         // fashion | jewellery | campaign | film | social
-    still: 's1',                   // CSS class for gradient still — replace src with real image/video path
-    video: null,                   // Set to '/assets/goldmine.mp4' when ready
-    poster: null,                  // '/assets/goldmine-poster.jpg'
-    lens: '100mm Macro',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '48p',
-    duration: '03:24',
-    codec: 'ProRes 4444',
-    format: '4K',
-    year: 2024,
-    featured: true,
-  },
-  {
-    id: 2,
-    slug: 'aavaran',
-    title: 'Aavaran',
-    subtitle: 'Fashion Film',
-    client: 'Aavaran Studio',
-    category: 'fashion',
-    still: 's2',
-    video: null,
-    poster: null,
-    lens: '50mm',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '24p',
-    duration: '02:47',
-    codec: 'Log-C RAW',
-    format: '4K',
-    year: 2024,
-    featured: true,
-  },
-  {
-    id: 3,
-    slug: 'nykaa-tvc',
-    title: 'Nykaa',
-    subtitle: 'TVC · 30s',
-    client: 'Nykaa',
-    category: 'campaign',
-    still: 's3',
-    video: null,
-    poster: null,
-    lens: '16mm',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '25p',
-    duration: '00:30',
-    codec: '4K ProRes',
-    format: '4K',
-    year: 2024,
-    featured: false,
-  },
-  {
-    id: 4,
-    slug: 'pallavi',
-    title: 'Pallavi',
-    subtitle: 'Short Film',
-    client: 'Independent',
-    category: 'film',
-    still: 's4',
-    video: null,
-    poster: null,
-    lens: '35mm',
-    camera: 'Thirty6 OS · MX-2',
-    fps: '24p',
-    duration: '08:12',
-    codec: 'RAW 6K',
-    format: '6K',
-    year: 2023,
-    featured: true,
-  },
-  {
-    id: 5,
-    slug: 'house-of-masaba',
-    title: 'House of Masaba',
-    subtitle: 'Lookbook Film',
-    client: 'House of Masaba',
-    category: 'fashion',
-    still: 's5',
-    video: null,
-    poster: null,
-    lens: '85mm',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '24p',
-    duration: '04:11',
-    codec: 'Log-C 4K',
-    format: '4K',
-    year: 2024,
-    featured: true,
-  },
-  {
-    id: 6,
-    slug: 'good-glamm',
-    title: 'Good Glamm',
-    subtitle: 'Brand Film',
-    client: 'Good Glamm Group',
-    category: 'campaign',
-    still: 's6',
-    video: null,
-    poster: null,
-    lens: '24mm',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '30p',
-    duration: '01:00',
-    codec: '4K H.265',
-    format: '4K',
-    year: 2023,
-    featured: false,
-  },
-  {
-    id: 7,
-    slug: 'rare-rabbit',
-    title: 'Rare Rabbit',
-    subtitle: 'Social · S01',
-    client: 'Rare Rabbit',
-    category: 'social',
-    still: 's7',
-    video: null,
-    poster: null,
-    lens: '35mm',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '24p',
-    duration: '00:45',
-    codec: '4K ProRes',
-    format: '4K · 9:16',
-    year: 2024,
-    featured: false,
-  },
-  {
-    id: 8,
-    slug: 'tanishq',
-    title: 'Tanishq',
-    subtitle: 'Product Series',
-    client: 'Tanishq',
-    category: 'jewellery',
-    still: 's8',
-    video: null,
-    poster: null,
-    lens: '100mm Macro',
-    camera: 'Thirty6 OS · FX-1',
-    fps: '48p',
-    duration: '03:55',
-    codec: 'ProRes 4444',
-    format: '4K',
-    year: 2024,
-    featured: true,
-  },
-];
+/* ── PROJECTS ───────────────────────────────────────────
+ * Populated at runtime from Supabase — see
+ * js/modules/data-loader.js and js/app.js (loadProjects()).
+ * This used to be a hardcoded array of mock projects; that's been
+ * removed in favor of the live `projects` table (published = true).
+ * ──────────────────────────────────────────────────────── */
+T36.PROJECTS = [];
 
 /* ── SERVICES (LENS CABINET) ────────────────────────── */
 T36.SERVICES = [

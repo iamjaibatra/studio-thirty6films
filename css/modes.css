@@ -309,7 +309,7 @@
 .tx-scope { position:absolute; top:12px; right:12px; width:60px; height:40px; background:#030303; border:1px solid #161616; display:flex; align-items:flex-end; gap:1px; padding:1px 2px 0; }
 .tx-scope-l { position:absolute; top:2px; left:3px; font-family:'JetBrains Mono',monospace; font-size:5.5px; color:var(--green-hi); opacity:.38; letter-spacing:.04em; }
 .txsb { flex:1; background:var(--green-hi); opacity:.32; transition:height .5s; }
-.tx-nosig { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:#060606; transition:opacity .32s; z-index:2; cursor:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.tx-nosig { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:#060606; transition:opacity .32s; z-index:2; cursor:none; }
 .tx-nosig.gone { opacity:0; pointer-events:none; }
 .nsig-bars { display:flex; gap:2px; margin-bottom:4px; }
 .nsb  { height:48px; width:22px; border-radius:0; }
@@ -318,6 +318,21 @@
 .tx-form.on { opacity:1; pointer-events:all; }
 .tx-h  { font-size:clamp(26px,3vw,42px); font-weight:300; letter-spacing:-.04em; line-height:1.06; margin-bottom:26px; }
 .tx-h strong { font-weight:600; }
+.tx-h:empty, .tx-desc:empty { display:none; margin:0; }
+.tx-desc { font-size:14px; color:var(--t3); line-height:1.5; margin:-14px 0 26px; max-width:52ch; }
+
+/* Optional background media behind the monitor panel — only rendered
+   when configured via page_content (transmit/content); #p-tx keeps its
+   existing solid var(--bg) look otherwise. */
+.tx-bg-media { position:absolute; inset:0; z-index:0; }
+.tx-bg-media img, .tx-bg-media video {
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+}
+.tx-bg-media::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(6,6,8,.82), rgba(6,6,8,.92));
+}
+.tx-mon { position:relative; z-index:1; }
 .txg   { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
 .txg-g { display:flex; flex-direction:column; gap:4px; }
 .txg-g.full { grid-column:1/-1; }
@@ -331,7 +346,7 @@
 .tx-info { font-family:'JetBrains Mono',monospace; font-size:7.5px; color:var(--t3); letter-spacing:.05em; line-height:2; }
 .tx-info a { color:var(--t2); text-decoration:none; transition:color .14s; cursor:none; }
 .tx-info a:hover { color:var(--t1); }
-.tx-sub { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; background:var(--red); color:#f4f4f4; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; border:none; cursor:none; transition:opacity .14s; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.tx-sub { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; background:var(--red); color:#f4f4f4; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; border:none; cursor:none; transition:opacity .14s; }
 .tx-sub:hover { opacity:.85; }
 .tx-sub:active { transform:scale(.97); }
 .tx-bot { height:36px; background:#0b0b0b; border:1px solid var(--line2); border-top:none; display:flex; align-items:center; padding:0 13px; justify-content:space-between; }
@@ -353,36 +368,17 @@
   .txg { grid-template-columns:1fr; }
   .fp-ctrls { gap:6px; padding:0 10px; }
   .tx-scr { padding:24px 20px; }
+  .pb-filters {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 60vw;
+  }
+  .pb-filters::-webkit-scrollbar { display: none; }
+  .pf { flex-shrink: 0; }
 }
 @media (max-width: 480px) {
   .pb-grid { grid-template-columns:repeat(2,1fr); }
   .cs-grid { grid-template-columns:repeat(2,1fr); }
   .lens-shelf { grid-template-columns:1fr; overflow-y:auto; }
-}
-
-/* ── MOBILE: override cursor:none on interactive transmit elements ── */
-@media (max-width: 768px) {
-  /* iOS Safari requires cursor:pointer for click events to fire
-     reliably on non-anchor elements. cursor:none suppresses taps. */
-  .tx-nosig,
-  .tx-sub,
-  .txg-i,
-  .txg-s,
-  .txg-t,
-  .tx-k,
-  .tx-info a,
-  .fp-btn,
-  .epc,
-  .pf,
-  .neg,
-  .clip,
-  .bin-row,
-  .insp-tab,
-  .sl-track,
-  .tl-t,
-  .lens-card {
-    cursor: pointer !important;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-  }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "studio-thirty6films",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Studio Thirty6 Films — public portfolio site (static HTML/CSS/JS, no bundler)",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "start": "npx --yes serve dist -l 3000",
+    "dev": "npx --yes serve . -l 3000"
+  }
+}

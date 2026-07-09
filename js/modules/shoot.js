@@ -41,6 +41,22 @@ export function initShoot(app) {
     });
   }
 
+  const enterBtn = document.getElementById('lv-enter');
+  if (enterBtn) {
+    enterBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const link = enterBtn.dataset.link || 'playback';
+      const modeIndex = app.MODES?.findIndex(m => m.toLowerCase() === link.toLowerCase());
+      if (modeIndex >= 0) {
+        app.switchMode(modeIndex);
+      } else if (/^(https?:|mailto:|tel:|\/)/i.test(link)) {
+        window.location.href = link;
+      } else {
+        app.switchMode(1); // default: Playback
+      }
+    });
+  }
+
   const bindScroll = (id, arr, get, set, render) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -106,4 +122,104 @@ export function toggleREC(app) {
   if (wrap) wrap.style.color = app.S.rec ? 'var(--red)' : 'var(--t3)';
 
   app.toast(app.S.rec ? '● RECORDING' : '■ STOPPED');
+}
+
+/**
+ * Applies CMS-driven content (page_content: shoot/hero, shoot/hud) to the
+ * DOM. Falls back to sensible copy only if the fetch failed entirely —
+ * normal empty fields just render blank rather than showing stale
+ * hardcoded text.
+ */
+export function applyShootContent(app, hero = {}, hud = {}) {
+  setText('lv-eye', hero.eyebrow);
+
+  const h1 = document.getElementById('lv-h1');
+  if (h1) {
+    h1.textContent = '';
+    if (hero.headline_plain) h1.appendChild(document.createTextNode(hero.headline_plain));
+    if (hero.headline_bold) {
+      const strong = document.createElement('strong');
+      strong.textContent = hero.headline_bold;
+      h1.appendChild(strong);
+    }
+  }
+
+  setText('lv-sub', hero.subheading);
+
+  const enterBtn = document.getElementById('lv-enter');
+  if (enterBtn) {
+    enterBtn.textContent = hero.button_text || 'Enter →';
+    enterBtn.dataset.link = hero.button_link || 'playback';
+  }
+
+  applyBackgroundMedia(hero);
+  applyHud(app, hud);
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value || '';
+}
+
+function applyBackgroundMedia(hero) {
+  const container = document.getElementById('lv-img');
+  const gradientBg = document.getElementById('lv-bg');
+  if (!container) return;
+
+  if (hero.background_video_url) {
+    gradientBg?.style.setProperty('display', 'none');
+    const video = document.createElement('video');
+    video.className = 'lv-real-bg';
+    video.src = hero.background_video_url;
+    if (hero.fallback_image_url) video.poster = hero.fallback_image_url;
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    container.insertBefore(video, container.firstChild);
+  } else if (hero.fallback_image_url) {
+    gradientBg?.style.setProperty('display', 'none');
+    const img = document.createElement('img');
+    img.className = 'lv-real-bg';
+    img.src = hero.fallback_image_url;
+    img.alt = '';
+    container.insertBefore(img, container.firstChild);
+  }
+
+  if (hero.ambient_video_url) {
+    const ambient = document.createElement('video');
+    ambient.className = 'lv-ambient';
+    ambient.src = hero.ambient_video_url;
+    ambient.autoplay = true;
+    ambient.muted = true;
+    ambient.loop = true;
+    ambient.playsInline = true;
+    container.appendChild(ambient);
+  }
+}
+
+function applyHud(app, hud) {
+  if (hud.iso) app.S.iso = hud.iso;
+  if (hud.aperture) app.S.ap = hud.aperture;
+  if (hud.shutter) app.S.ss = hud.shutter;
+  if (hud.white_balance) app.S.wb = hud.white_balance;
+
+  const iso = document.getElementById('h-iso');
+  if (iso && hud.iso) iso.innerHTML = `ISO <span class="v">${hud.iso}</span>`;
+  const ap = document.getElementById('h-ap');
+  if (ap && hud.aperture) ap.innerHTML = `f/<span class="v">${hud.aperture}</span>`;
+  const ss = document.getElementById('h-ss');
+  if (ss && hud.shutter) ss.innerHTML = `1/<span class="v">${hud.shutter}</span>s`;
+  const wb = document.getElementById('h-wb');
+  if (wb && hud.white_balance) wb.innerHTML = `WB <span class="v">${hud.white_balance}K</span>`;
+
+  const lens = document.getElementById('h-lens');
+  if (lens && hud.lens) lens.textContent = hud.lens;
+
+  const bat = document.getElementById('h-bat');
+  const batFill = document.getElementById('h-bat-fill');
+  if (hud.battery_percent != null) {
+    if (bat) bat.textContent = `${hud.battery_percent}%`;
+    if (batFill) batFill.style.width = `${hud.battery_percent}%`;
+  }
 }

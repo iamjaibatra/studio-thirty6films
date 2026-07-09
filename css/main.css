@@ -38,9 +38,20 @@ body {
   user-select: none;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: auto;
 }
-button { font: inherit; border: none; background: none; cursor: none; }
-input, select, textarea { font: inherit; cursor: none; }
+button, a, [role="button"], input, select, textarea {
+  font: inherit;
+  border: none;
+  background: none;
+  cursor: none;
+  touch-action: auto;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  pointer-events: auto;
+}
+input, select, textarea { cursor: none; }
 a { cursor: none; }
 
 /* ── CURSOR ─────────────────────────────────────────── */
@@ -103,13 +114,14 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
 #boot {
   position: fixed; inset: 0;
   background: #040404;
-  z-index: 9990;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 28px;
   transition: opacity .5s;
+  pointer-events: none;
 }
 #boot.out { opacity: 0; pointer-events: none; }
 .boot-name {
@@ -173,6 +185,9 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
   grid-template-columns: var(--rail-w) 1fr var(--rail-w);
   opacity: 0;
   transition: opacity .5s;
+  z-index: 2;
+  pointer-events: auto;
+  isolation: isolate;
 }
 #cam.on { opacity: 1; }
 
@@ -182,12 +197,7 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
   background: var(--panel);
   border-bottom: 1px solid var(--line2);
   display: flex; align-items: center;
-  padding: 0 14px; gap: 0;
-  /* z-index + isolation ensures topbar and its children
-     (including .top-nav on mobile) layer above #vp pages */
-  z-index: 200;
-  isolation: isolate;
-  position: relative; /* needed for z-index to take effect in grid */
+  padding: 0 14px; gap: 0; z-index: 100;
 }
 .top-nav {
     display: flex;
@@ -294,13 +304,6 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
   opacity: 0; pointer-events: none;
   transition: opacity .2s;
 }
-/* Ensure ALL children of inactive pages also cannot receive
-   pointer events — prevents invisible form inputs in #p-tx
-   from intercepting clicks/taps on other pages after the
-   transmit monitor has been powered on (.tx-form.on persists). */
-.page:not(.on) * {
-  pointer-events: none !important;
-}
 .page.on { opacity: 1; pointer-events: all; }
 
 /* ── SHOOT MODE ─────────────────────────────────────── */
@@ -317,6 +320,23 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
     radial-gradient(ellipse 36% 52% at 72% 30%, rgba(110,145,240,.07) 0%, transparent 50%),
     linear-gradient(156deg, #0e0b07 0%, #110f08 38%, #080809 72%, #060608 100%);
   animation: breathe 7s ease-in-out infinite;
+}
+/* Real background video/image from the CMS (page_content: shoot/hero).
+   Sits behind .lv-bg's gradient wash; shoot.js hides .lv-bg when this is
+   in use so the existing grain/vignette treatment still applies on top. */
+.lv-real-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+/* Optional secondary looping ambient video layer, subtle opacity so it
+   reads as atmosphere rather than the main subject. */
+.lv-ambient {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: .35;
+  mix-blend-mode: screen;
 }
 @keyframes breathe {
   0%,100% { transform: scale(1)     translate(0, 0); }
@@ -499,19 +519,11 @@ body.gleak #vp::after {
     --rail-w:    0px;
   }
   #rail-l, #rail-r { display: none; }
-.mode-tab {
-  width: 100%;
-  padding: 18px 0;
-  text-align: left;
-  font-size: 15px;
-  /* cursor:none breaks iOS tap events — must be pointer on touch devices */
-  cursor: pointer;
-  /* Suppress 300ms tap delay on mobile browsers */
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  /* Ensure the full button area is tappable */
-  -webkit-user-select: none;
-  user-select: none;
+.mode-tab{
+    width:100%;
+    padding:18px 0;
+    text-align:left;
+    font-size:15px;
 }
 
 #topbar{
@@ -526,54 +538,57 @@ body.gleak #vp::after {
     font-size:8px;
 }
   .tb-s, .tb-right { display:none; }
-.top-nav {
-  display: flex;
-  position: fixed;
-  top: 0;
-  right: -100%;
-  overscroll-behavior: contain;
-  width: 280px;
-  height: 100vh;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 90px 32px;
-  background: #0b0b0b;
-  border-left: 1px solid rgba(255,255,255,.08);
-  transition: right .4s ease;
-  /* High z-index so drawer sits above all grid content */
-  z-index: 1100;
-  /* Own stacking context — nothing inside can leak below */
-  isolation: isolate;
-  /* Ensure taps inside the open drawer are never swallowed */
-  pointer-events: none;
+.top-nav{
+    display:flex;
+
+    position:fixed;
+    top:0;
+    right:-100%;
+    overscroll-behavior: contain;
+
+    width:280px;
+    height:100vh;
+
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+
+    padding:90px 32px;
+
+    background:#0b0b0b;
+
+    border-left:1px solid rgba(255,255,255,.08);
+
+    transition:right .4s ease;
+
+    z-index:998;
 }
 
-.top-nav.open {
-  right: 0;
-  /* Only enable pointer-events when visible */
-  pointer-events: all;
+.top-nav.open{
+    right:0;
 }
-#mobile-menu-btn {
-  display: flex;
-  width: 44px;
-  height: 44px;
-  margin-left: auto;
-  background: none;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  /* Must be above .top-nav (z:1100) so button stays tappable when nav is open */
-  z-index: 1200;
-  justify-content: center;
-  align-items: center;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none;
-  user-select: none;
-  /* Explicit tap target size for accessibility */
-  min-width: 44px;
-  min-height: 44px;
+#mobile-menu-btn{
+
+    display:flex;
+
+    width:44px;
+    height:44px;
+
+    margin-left:auto;
+
+    background:none;
+    border:none;
+
+    cursor:pointer;
+
+    position:relative;
+    z-index:1001;
+
+    justify-content:center;
+    align-items:center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+
 }
 
 #mobile-menu-btn span{
@@ -622,23 +637,6 @@ body.gleak #vp::after {
   #vp { grid-column: 1/-1; }
   body { cursor: auto; }
   #cur { display: none; }
-}
-
-
-/* ── MOBILE NAV BACKDROP ────────────────────────────── */
-/* Invisible overlay behind the open nav drawer.
-   Tapping it closes the menu. Created in JS and
-   appended to body — z-index sits between pages (0) and nav (1100). */
-#nav-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 1050;
-  background: rgba(0,0,0,0);
-  /* No pointer-events by default — JS enables when nav opens */
-}
-#nav-backdrop.visible {
-  display: block;
 }
 
 /* ── REDUCED MOTION ─────────────────────────────────── */

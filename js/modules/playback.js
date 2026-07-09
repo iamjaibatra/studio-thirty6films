@@ -1,6 +1,71 @@
+function applyStill(el, p) {
+  if (p.thumbnail) {
+    el.style.backgroundImage = `url("${p.thumbnail}")`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  } else if (p.still) {
+    el.classList.add(p.still);
+  }
+}
+
+function buildFilters(projects) {
+  const bar = document.getElementById('pb-filters');
+  if (!bar) return;
+
+  const seen = new Map();
+  projects.forEach(p => {
+    if (!seen.has(p.categorySlug)) seen.set(p.categorySlug, p.category);
+  });
+
+  const hasFeatured = projects.some(p => p.featured);
+
+  bar.innerHTML = '';
+  bar.appendChild(makeFilterButton('all', 'All', true));
+  if (hasFeatured) bar.appendChild(makeFilterButton('featured', 'Featured', false));
+  [...seen.entries()]
+    .sort((a, b) => a[1].localeCompare(b[1]))
+    .forEach(([slug, label]) => bar.appendChild(makeFilterButton(slug, label, false)));
+}
+
+function makeFilterButton(value, label, active) {
+  const btn = document.createElement('button');
+  btn.className = active ? 'pf on' : 'pf';
+  btn.dataset.f = value;
+  btn.textContent = label;
+  return btn;
+}
+
+function renderEmptyState(grid) {
+  const empty = document.createElement('div');
+  empty.className = 'pb-empty';
+  empty.setAttribute('role', 'status');
+  empty.style.cssText =
+    'grid-column:1/-1;display:flex;align-items:center;justify-content:center;' +
+    'min-height:240px;font-family:"JetBrains Mono",monospace;font-size:11px;' +
+    'letter-spacing:.05em;color:var(--t3);text-transform:uppercase;';
+  empty.textContent = 'No productions published yet — check back soon.';
+  grid.appendChild(empty);
+}
+
 export function initPlayback(app) {
   const grid = document.getElementById('pb-grid');
   if (!grid || !window.T36?.PROJECTS) return;
+
+  const projects = window.T36.PROJECTS;
+
+  const countEl = document.getElementById('pb-count');
+  if (countEl) {
+    countEl.textContent = projects.length
+      ? `${projects.length} CLIP${projects.length === 1 ? '' : 'S'}`
+      : '0 CLIPS';
+  }
+
+  buildFilters(projects);
+
+  if (!projects.length) {
+    renderEmptyState(grid);
+    return;
+  }
 
   const scheduleIdle = callback => {
     if (typeof window.requestIdleCallback === 'function') {
@@ -9,22 +74,24 @@ export function initPlayback(app) {
     return window.setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 50 }), 0);
   };
 
-  window.T36.PROJECTS.forEach((p, i) => {
+  projects.forEach((p, i) => {
     const d = document.createElement('div');
-    d.className = `clip ${p.still}`;
-    d.dataset.cat = p.category;
+    d.className = 'clip';
+    applyStill(d, p);
+    d.dataset.cat = p.categorySlug;
+    d.dataset.featured = p.featured ? '1' : '0';
     d.dataset.idx = i;
     d.setAttribute('role', 'button');
     d.setAttribute('tabindex', '0');
     d.innerHTML = `
       <div class="clip-grain"></div>
-      <div class="clip-idx">${String(p.id).padStart(3, '0')}</div>
+      <div class="clip-idx">${String(i + 1).padStart(3, '0')}</div>
       <div class="clip-tc">${p.duration}</div>
       <div class="clip-ov"><div class="clip-play"><svg viewBox="0 0 10 12"><polygon points="0,0 10,6 0,12"/></svg></div></div>
       <div class="clip-wv" id="cw${i}"></div>
       <div class="clip-meta">
         <span class="clip-title">${p.title}</span>
-        <span class="clip-spec">${p.lens} · ${p.fps} · ${p.codec}</span>
+        <span class="clip-spec">${p.spec}</span>
       </div>`;
 
     if (p.video) {
@@ -77,7 +144,7 @@ export function initPlayback(app) {
 
     d.addEventListener('mouseenter', () => {
       const psFile = document.getElementById('ps-file');
-      if (psFile) psFile.textContent = String(p.id).padStart(3, '0');
+      if (psFile) psFile.textContent = String(i + 1).padStart(3, '0');
     });
     d.addEventListener('click', () => app.openClip(i));
     d.addEventListener('keydown', e => {
@@ -95,7 +162,7 @@ export function initPlayback(app) {
 
     const f = btn.dataset.f;
     document.querySelectorAll('.clip').forEach(c => {
-      const show = f === 'all' || c.dataset.cat === f;
+      const show = f === 'all' || (f === 'featured' ? c.dataset.featured === '1' : c.dataset.cat === f);
       c.style.opacity = show ? '1' : '0.12';
       c.style.pointerEvents = show ? 'all' : 'none';
       c.style.transition = 'opacity .18s';
@@ -126,7 +193,11 @@ export function openClip(app, idx) {
   fp.classList.add('on');
 
   const fpBg = document.getElementById('fp-bg');
-  if (fpBg) fpBg.className = `fp-bg ${p.still}`;
+  if (fpBg) {
+    fpBg.className = 'fp-bg';
+    fpBg.style.backgroundImage = '';
+    applyStill(fpBg, p);
+  }
 
   if (p.video) {
     let vid = fp.querySelector('video');
