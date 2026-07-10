@@ -32,7 +32,7 @@ export async function loadProjects() {
   const { data, error } = await supabase
     .from('projects')
     .select(
-      'id, title, slug, client, category, year, description, duration, featured, thumbnail, video, created_at'
+      'id, title, slug, client, category, year, description, duration, featured, thumbnail, video, hover_video, credits, created_at'
     )
     .eq('published', true)
     .order('featured', { ascending: false })
@@ -57,13 +57,38 @@ export async function loadProjects() {
       still: hasThumbnail ? '' : `s${(i % FALLBACK_STILL_COUNT) + 1}`,
       thumbnail: row.thumbnail || null,
       video: row.video || null,
+      // Short hover-preview loop, falling back to the full video if a
+      // project doesn't have a separate one set.
+      hoverVideo: row.hover_video || row.video || null,
       poster: row.thumbnail || null,
       duration: row.duration || '—',
       year: row.year ?? '',
       featured: Boolean(row.featured),
+      credits: Array.isArray(row.credits) ? row.credits : [],
       spec: [row.category, row.year].filter(Boolean).join(' · ') || '—',
     };
   });
 
   return { projects, error: null };
+}
+
+/**
+ * Gallery images for a single project, fetched lazily (only when the
+ * fullscreen player actually opens) rather than joined into every card
+ * in the grid.
+ */
+export async function loadProjectGallery(projectId) {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('project_gallery')
+    .select('sort_order, media:media_id ( url, name, alt_text )')
+    .eq('project_id', projectId)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('[T36] Failed to load project gallery:', error);
+    return [];
+  }
+  return (data ?? []).map(row => row.media).filter(Boolean);
 }

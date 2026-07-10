@@ -122,7 +122,7 @@ export function applyTransmitContent(app, content = {}, services = []) {
     services.forEach(s => {
       const opt = document.createElement('option');
       opt.value = s.title;
-      opt.textContent = s.title;
+      opt.textContent = s.specs?.focal ? `${s.specs.focal}mm — ${s.title}` : s.title;
       serviceSelect.appendChild(opt);
     });
   }

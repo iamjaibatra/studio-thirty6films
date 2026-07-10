@@ -294,6 +294,16 @@
           <div class="fp-bg" id="fp-bg"></div>
           <div class="fp-title" id="fp-title"></div>
         </div>
+        <div class="fp-info" id="fp-info-panel">
+          <div id="fp-credits-section">
+            <h4>Credits</h4>
+            <div class="fp-credits" id="fp-credits"></div>
+          </div>
+          <div id="fp-gallery-section">
+            <h4>Gallery</h4>
+            <div class="fp-gallery" id="fp-gallery"></div>
+          </div>
+        </div>
         <div class="fp-ctrls">
           <span class="fp-tc" id="fp-tc">00:00:00</span>
           <button class="fp-btn" id="fp-prev" aria-label="Previous clip">⏮</button>
@@ -304,6 +314,7 @@
           <div class="fp-prog" id="fp-prog" role="progressbar" aria-label="Playback progress">
             <div class="fp-fill" id="fp-fill"></div>
           </div>
+          <button class="fp-btn" id="fp-info" aria-label="Project info">ⓘ</button>
           <button class="fp-btn" id="fp-close" aria-label="Close">ESC ✕</button>
         </div>
       </div>
@@ -340,10 +351,10 @@
             <div class="cs-s"></div><div class="cs-s"></div>
           </div>
           <div class="clap-fields">
-            <div class="cf"><div class="cf-l">Production</div><div class="cf-v">STUDIO THIRTY6</div></div>
-            <div class="cf"><div class="cf-l">Director</div><div class="cf-v">Gimmy Kohli</div></div>
-            <div class="cf"><div class="cf-l">Scene</div><div class="cf-v">ARCHIVE</div></div>
-            <div class="cf"><div class="cf-l">Take</div><div class="cf-v">36</div></div>
+            <div class="cf"><div class="cf-l">Production</div><div class="cf-v" id="cf-production"></div></div>
+            <div class="cf"><div class="cf-l">Director</div><div class="cf-v" id="cf-director"></div></div>
+            <div class="cf"><div class="cf-l">Scene</div><div class="cf-v" id="cf-scene"></div></div>
+            <div class="cf"><div class="cf-l">Take</div><div class="cf-v" id="cf-take"></div></div>
           </div>
         </div>
       </div>
@@ -351,11 +362,12 @@
       <!-- about panel -->
       <aside class="about-pnl">
         <div class="ap-lbl">About the studio</div>
-        <h2 class="ap-h">We <strong>observe</strong><br>before we<br>shoot.</h2>
-        <p class="ap-b">Studio Thirty6 is a New Delhi–based visual production house. We work with fashion brands, jewellery houses, and luxury campaigns that demand something beyond a spec sheet.</p>
-        <p class="ap-b">Every project begins with the same question: what does this feel like in the body? The camera follows from that answer — not the other way around.</p>
-        <!-- stats — built by JS from T36.STUDIO.stats -->
+        <h2 class="ap-h" id="ap-h"></h2>
+        <p class="ap-b" id="ap-b1"></p>
+        <p class="ap-b" id="ap-b2"></p>
+        <!-- stats — built by JS from page_content (archive/content) -->
         <div class="ap-stats" id="ap-stats"></div>
+        <p class="ap-footer" id="ap-footer"></p>
       </aside>
 
     </section>
@@ -413,14 +425,14 @@
             </div>
             <div class="insp-sec">
               <div class="insp-sec-h">Grade</div>
-              <div class="insp-row"><span class="insp-p">Profile</span><span class="insp-v" style="color:var(--blue-hi)">Log-C → Rec.709</span></div>
+              <div class="insp-row"><span class="insp-p">Profile</span><span class="insp-v" id="ep-grade-profile" style="color:var(--blue-hi)">Log-C → Rec.709</span></div>
               <div class="insp-row"><span class="insp-p">Intensity</span><div class="sl-track" data-p="lut" data-v="100"><div class="sl-fill" style="width:100%"><div class="sl-thumb" style="left:100%"></div></div></div></div>
             </div>
             <div class="insp-sec">
               <div class="insp-sec-h">Transform</div>
-              <div class="insp-row"><span class="insp-p">Scale</span>    <span class="insp-v">100.0</span></div>
-              <div class="insp-row"><span class="insp-p">Position X</span><span class="insp-v">960.0</span></div>
-              <div class="insp-row"><span class="insp-p">Position Y</span><span class="insp-v">540.0</span></div>
+              <div class="insp-row"><span class="insp-p">Scale</span>    <span class="insp-v" id="ep-scale">100.0</span></div>
+              <div class="insp-row"><span class="insp-p">Position X</span><span class="insp-v" id="ep-pos-x">960.0</span></div>
+              <div class="insp-row"><span class="insp-p">Position Y</span><span class="insp-v" id="ep-pos-y">540.0</span></div>
             </div>
           </div>
         </div>
@@ -451,16 +463,8 @@
             </div>
             <div class="tl-rows">
               <div class="tl-ph" id="tl-ph"></div>
-              <!-- V1 -->
-              <div class="tl-row">
-                <div class="tl-clip c-bl"  style="left:0%;width:18%"  data-i="0"><span class="tc-lbl">Brief · Research</span></div>
-                <div class="tl-clip c-bl2" style="left:19%;width:12%" data-i="2"><span class="tc-lbl">Treatment</span></div>
-                <div class="tl-clip c-bl"  style="left:32%;width:9%"  data-i="3"><span class="tc-lbl">Storyboard</span></div>
-                <div class="tl-clip c-bl2" style="left:42%;width:15%" data-i="4"><span class="tc-lbl">Production</span></div>
-                <div class="tl-clip c-bl"  style="left:58%;width:14%" data-i="5"><span class="tc-lbl">Edit</span></div>
-                <div class="tl-clip c-bl2" style="left:73%;width:10%" data-i="6"><span class="tc-lbl">Grade</span></div>
-                <div class="tl-clip c-bl"  style="left:84%;width:8%"  data-i="8"><span class="tc-lbl">Delivery</span></div>
-              </div>
+              <!-- V1 — populated from timeline_stages by js/modules/edit.js -->
+              <div class="tl-row" id="tl-v1-row"></div>
               <!-- V2 -->
               <div class="tl-row">
                 <div class="tl-clip c-ye" style="left:0%;width:5%;height:17px;top:6px"  data-i="0"><span class="tc-lbl">Title</span></div>

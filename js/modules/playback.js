@@ -1,3 +1,5 @@
+import { loadProjectGallery } from './data-loader.js';
+
 function applyStill(el, p) {
   if (p.thumbnail) {
     el.style.backgroundImage = `url("${p.thumbnail}")`;
@@ -94,9 +96,9 @@ export function initPlayback(app) {
         <span class="clip-spec">${p.spec}</span>
       </div>`;
 
-    if (p.video) {
+    if (p.hoverVideo) {
       const vid = document.createElement('video');
-      vid.src = p.video;
+      vid.src = p.hoverVideo;
       vid.poster = p.poster || '';
       vid.muted = true;
       vid.loop = true;
@@ -170,6 +172,9 @@ export function initPlayback(app) {
   });
 
   document.getElementById('fp-close')?.addEventListener('click', () => app.closeClip());
+  document.getElementById('fp-info')?.addEventListener('click', () => {
+    document.getElementById('fp-info-panel')?.classList.toggle('on');
+  });
   document.getElementById('fp-play')?.addEventListener('click', () => app.togglePlay());
   document.getElementById('fp-next')?.addEventListener('click', () => app.openClip((app.S.playClip + 1) % window.T36.PROJECTS.length));
   document.getElementById('fp-prev')?.addEventListener('click', () => app.openClip((app.S.playClip - 1 + window.T36.PROJECTS.length) % window.T36.PROJECTS.length));
@@ -218,13 +223,57 @@ export function openClip(app, idx) {
   const playBtn = document.getElementById('fp-play');
   if (playBtn) playBtn.textContent = '⏸';
 
+  document.getElementById('fp-info-panel')?.classList.remove('on');
+  renderCredits(p.credits);
+  loadProjectGallery(p.id).then(renderGallery);
+
   app.startPlay();
+}
+
+function renderCredits(credits) {
+  const el = document.getElementById('fp-credits');
+  const section = document.getElementById('fp-credits-section');
+  if (!el || !section) return;
+
+  el.innerHTML = '';
+  if (!credits || !credits.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  credits.forEach(c => {
+    if (!c.role && !c.name) return;
+    const span = document.createElement('span');
+    span.innerHTML = `<span class="role">${c.role || ''}</span>${c.name || ''}`;
+    el.appendChild(span);
+  });
+}
+
+function renderGallery(images) {
+  const el = document.getElementById('fp-gallery');
+  const section = document.getElementById('fp-gallery-section');
+  if (!el || !section) return;
+
+  el.innerHTML = '';
+  if (!images || !images.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+  images.forEach(img => {
+    const image = document.createElement('img');
+    image.src = img.url;
+    image.alt = img.alt_text || img.name || '';
+    image.loading = 'lazy';
+    el.appendChild(image);
+  });
 }
 
 export function closeClip(app) {
   const fp = document.getElementById('fp');
   fp?.classList.remove('on');
   fp?.querySelector('video')?.pause();
+  document.getElementById('fp-info-panel')?.classList.remove('on');
   app.S.playing = false;
   clearInterval(app.S.playTimer);
   app.S.playProg = 0;

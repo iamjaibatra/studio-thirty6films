@@ -19,68 +19,11 @@ window.T36 = window.T36 || {};
 T36.PROJECTS = [];
 
 /* ── SERVICES (LENS CABINET) ────────────────────────── */
-T36.SERVICES = [
-  {
-    focal: '24',
-    spec: 'T1.5 · Ultra-wide',
-    title: 'Brand Films',
-    description: 'Wide environmental storytelling. The brand inside a world the audience wants to inhabit.',
-    deliverables: ['Brand manifesto film', 'Campaign cutdowns', 'Social adaptations'],
-    duration: '60s – 5min',
-    format: '4K · ProRes',
-    dof: 'Deep',
-  },
-  {
-    focal: '35',
-    spec: 'T1.5 · Classic',
-    title: 'Founder Stories',
-    description: 'Intimate enough to feel close. Wide enough for context. Honest and human.',
-    deliverables: ['Founder documentary', 'Behind the brand', 'Long-form narrative'],
-    duration: '3 – 15min',
-    format: '4K · RAW',
-    dof: 'Natural',
-  },
-  {
-    focal: '50',
-    spec: 'T1.2 · Standard',
-    title: 'Fashion Campaigns',
-    description: 'Human-eye perspective. The lens that sees what the audience sees — and makes it aspirational.',
-    deliverables: ['Seasonal campaign film', 'Lookbook video', 'Editorial motion'],
-    duration: '2 – 6min',
-    format: '4K · Log-C',
-    dof: 'Selective',
-  },
-  {
-    focal: '85',
-    spec: 'T1.4 · Portrait',
-    title: 'Documentary',
-    description: 'Compression that creates intimacy. For stories about people — their truth, their world.',
-    deliverables: ['Character documentary', 'Process film', 'Archive project'],
-    duration: '10 – 60min',
-    format: '4K · RAW',
-    dof: 'Shallow',
-  },
-  {
-    focal: '100',
-    spec: 'T2.8 · Macro',
-    title: 'Jewellery Films',
-    description: 'Every grain of metal. Every edge of stone. A love letter to craft at 1:1 reproduction.',
-    deliverables: ['Product hero film', 'Craft series', 'E-commerce video'],
-    duration: '90s – 4min',
-    format: 'ProRes 4444',
-    dof: 'Extreme',
-  },
-  {
-    focal: '70–200',
-    spec: 'T2.8 · Telephoto',
-    title: 'Event Coverage',
-    description: 'Distance becomes intimacy. Reaches across a room and makes a stranger look like a subject.',
-    deliverables: ['Event highlight', 'Gala coverage', 'Fashion week film'],
-    duration: '3 – 20min',
-    format: '4K · H.265',
-    dof: 'Compressed',
-  },
-];
+/* ── SERVICES ───────────────────────────────────────────
+ * Populated at runtime from Supabase — see
+ * js/modules/lenses.js and js/app.js (loadServices()).
+ * ──────────────────────────────────────────────────────── */
+T36.SERVICES = [];
 
 /* ── STUDIO INFO ────────────────────────────────────── */
 T36.STUDIO = {
