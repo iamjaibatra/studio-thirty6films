@@ -321,6 +321,23 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
     linear-gradient(156deg, #0e0b07 0%, #110f08 38%, #080809 72%, #060608 100%);
   animation: breathe 7s ease-in-out infinite;
 }
+/* Real background video/image from the CMS (page_content: shoot/hero).
+   Sits behind .lv-bg's gradient wash; shoot.js hides .lv-bg when this is
+   in use so the existing grain/vignette treatment still applies on top. */
+.lv-real-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+/* Optional secondary looping ambient video layer, subtle opacity so it
+   reads as atmosphere rather than the main subject. */
+.lv-ambient {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: .35;
+  mix-blend-mode: screen;
+}
 @keyframes breathe {
   0%,100% { transform: scale(1)     translate(0, 0); }
   30%      { transform: scale(1.004) translate(.4px, -.5px); }
