@@ -113,7 +113,8 @@
 #fp.on { display:flex; }
 .fp-scr { flex:1; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; }
 .fp-bg  { position:absolute; inset:0; }
-.fp-title { font-size:clamp(26px,3.2vw,48px); font-weight:300; letter-spacing:-.04em; z-index:2; text-align:center; }
+.fp-title { font-size:clamp(26px,3.2vw,48px); font-weight:300; letter-spacing:-.04em; z-index:2; text-align:center; transition:opacity .3s ease; opacity:1; }
+.fp-title.fp-idle { opacity:0; }
 .fp-info {
   position:absolute; left:0; right:0; bottom:48px; z-index:3;
   max-height:38%; overflow-y:auto;
@@ -158,10 +159,9 @@
 
 .cs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-bottom:18px; }
 .neg { position:relative; aspect-ratio:4/3; overflow:hidden; cursor:none; }
-.neg:hover .neg-pos { opacity:1; }
 .neg:hover .neg-info { opacity:1; }
 .neg-neg { position:absolute; inset:0; }
-.neg-pos { position:absolute; inset:0; opacity:0; transition:opacity .32s; }
+.neg-pos { position:absolute; inset:0; opacity:1; }
 .neg-num { position:absolute; bottom:3px; right:4px; font-family:'JetBrains Mono',monospace; font-size:6.5px; color:rgba(244,244,244,.17); }
 .neg-info {
   position:absolute; inset:0; background:rgba(4,4,4,.76);

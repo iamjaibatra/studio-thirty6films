@@ -18,6 +18,14 @@ export function switchMode(app, n) {
   const nextMode = Number(n);
   if (Number.isNaN(nextMode) || nextMode === app.S.mode) return;
 
+  // Dismiss any open mobile keyboard/native picker tied to a focused form
+  // control on the page being left — otherwise that native UI (which is
+  // outside CSS's control) can remain visible over the next page.
+  const active = document.activeElement;
+  if (active && typeof active.blur === 'function' && active !== document.body) {
+    active.blur();
+  }
+
   app.S.mode = nextMode;
 
   app.PAGE_IDS.forEach((id, i) => {

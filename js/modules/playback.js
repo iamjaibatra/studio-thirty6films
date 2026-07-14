@@ -180,10 +180,30 @@ export function initPlayback(app) {
   document.getElementById('fp-prev')?.addEventListener('click', () => app.openClip((app.S.playClip - 1 + window.T36.PROJECTS.length) % window.T36.PROJECTS.length));
   document.getElementById('fp-prog')?.addEventListener('click', e => {
     const r = e.currentTarget.getBoundingClientRect();
-    app.S.playProg = (e.clientX - r.left) / r.width;
+    app.S.playProg = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
     const fill = document.getElementById('fp-fill');
     if (fill) fill.style.width = `${app.S.playProg * 100}%`;
+
+    const vid = document.getElementById('fp')?.querySelector('video');
+    if (vid && vid.duration) {
+      vid.currentTime = app.S.playProg * vid.duration;
+    }
   });
+
+  const fpEl = document.getElementById('fp');
+  fpEl?.addEventListener('mousemove', resetTitleIdleTimer);
+  fpEl?.addEventListener('touchstart', resetTitleIdleTimer, { passive: true });
+}
+
+let titleIdleTimer = null;
+
+/** Shows the fullscreen title and restarts the ~1s countdown before it fades again. */
+function resetTitleIdleTimer() {
+  clearTimeout(titleIdleTimer);
+  document.getElementById('fp-title')?.classList.remove('fp-idle');
+  titleIdleTimer = setTimeout(() => {
+    document.getElementById('fp-title')?.classList.add('fp-idle');
+  }, 1000);
 }
 
 export function openClip(app, idx) {
@@ -219,6 +239,7 @@ export function openClip(app, idx) {
 
   const title = document.getElementById('fp-title');
   if (title) title.textContent = p.title;
+  resetTitleIdleTimer();
 
   const playBtn = document.getElementById('fp-play');
   if (playBtn) playBtn.textContent = '⏸';
@@ -274,6 +295,8 @@ export function closeClip(app) {
   fp?.classList.remove('on');
   fp?.querySelector('video')?.pause();
   document.getElementById('fp-info-panel')?.classList.remove('on');
+  clearTimeout(titleIdleTimer);
+  document.getElementById('fp-title')?.classList.remove('fp-idle');
   app.S.playing = false;
   clearInterval(app.S.playTimer);
   app.S.playProg = 0;
@@ -302,13 +325,22 @@ export function togglePlay(app) {
 export function startPlay(app) {
   clearInterval(app.S.playTimer);
   app.S.playTimer = setInterval(() => {
-    app.S.playProg = Math.min(1, app.S.playProg + 0.0014);
+    const vid = document.getElementById('fp')?.querySelector('video');
+    const hasRealVideo = vid && vid.duration;
+
+    if (hasRealVideo) {
+      app.S.playProg = vid.currentTime / vid.duration;
+    } else {
+      app.S.playProg = Math.min(1, app.S.playProg + 0.0014);
+    }
+
     const fill = document.getElementById('fp-fill');
     if (fill) fill.style.width = `${app.S.playProg * 100}%`;
 
-    const s = Math.floor(app.S.playProg * 324);
+    const s = hasRealVideo ? Math.floor(vid.currentTime) : Math.floor(app.S.playProg * 324);
     const tc = document.getElementById('fp-tc');
     if (tc) tc.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}:00`;
-    if (app.S.playProg >= 1) app.S.playProg = 0;
+
+    if (!hasRealVideo && app.S.playProg >= 1) app.S.playProg = 0;
   }, 100);
 }
