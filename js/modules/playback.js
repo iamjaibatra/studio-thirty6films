@@ -1,10 +1,13 @@
 import { loadProjectGallery } from './data-loader.js';
+import { ICON_PLAY, ICON_PAUSE } from './icons.js';
 
-function applyStill(el, p) {
+function applyStill(el, p, { crop = true } = {}) {
   if (p.thumbnail) {
     el.style.backgroundImage = `url("${p.thumbnail}")`;
-    el.style.backgroundSize = 'cover';
+    el.style.backgroundSize = crop ? 'cover' : 'contain';
     el.style.backgroundPosition = 'center';
+    el.style.backgroundRepeat = 'no-repeat';
+    if (!crop) el.style.backgroundColor = 'var(--panel)';
   } else if (p.still) {
     el.classList.add(p.still);
   }
@@ -79,7 +82,7 @@ export function initPlayback(app) {
   projects.forEach((p, i) => {
     const d = document.createElement('div');
     d.className = 'clip';
-    applyStill(d, p);
+    applyStill(d, p, { crop: false });
     d.dataset.cat = p.categorySlug;
     d.dataset.featured = p.featured ? '1' : '0';
     d.dataset.idx = i;
@@ -190,12 +193,27 @@ export function initPlayback(app) {
     }
   });
 
+  document.getElementById('fp-back')?.addEventListener('click', () => seekRelative(app, -10));
+  document.getElementById('fp-fwd')?.addEventListener('click', () => seekRelative(app, 10));
+
   const fpEl = document.getElementById('fp');
   fpEl?.addEventListener('mousemove', resetTitleIdleTimer);
   fpEl?.addEventListener('touchstart', resetTitleIdleTimer, { passive: true });
 }
 
 let titleIdleTimer = null;
+
+function seekRelative(app, deltaSeconds) {
+  const vid = document.getElementById('fp')?.querySelector('video');
+
+  if (vid && vid.duration) {
+    vid.currentTime = Math.max(0, Math.min(vid.duration, vid.currentTime + deltaSeconds));
+  } else {
+    app.S.playProg = Math.max(0, Math.min(1, app.S.playProg + deltaSeconds * 0.01));
+    const fill = document.getElementById('fp-fill');
+    if (fill) fill.style.width = `${app.S.playProg * 100}%`;
+  }
+}
 
 /** Shows the fullscreen title and restarts the ~1s countdown before it fades again. */
 function resetTitleIdleTimer() {
@@ -228,7 +246,7 @@ export function openClip(app, idx) {
     let vid = fp.querySelector('video');
     if (!vid) {
       vid = document.createElement('video');
-      vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;';
+      vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1;';
       fp.querySelector('.fp-scr').appendChild(vid);
     }
     vid.src = p.video;
@@ -242,7 +260,7 @@ export function openClip(app, idx) {
   resetTitleIdleTimer();
 
   const playBtn = document.getElementById('fp-play');
-  if (playBtn) playBtn.textContent = '⏸';
+  if (playBtn) playBtn.innerHTML = ICON_PAUSE;
 
   document.getElementById('fp-info-panel')?.classList.remove('on');
   renderCredits(p.credits);
@@ -308,7 +326,7 @@ export function closeClip(app) {
 export function togglePlay(app) {
   app.S.playing = !app.S.playing;
   const btn = document.getElementById('fp-play');
-  if (btn) btn.textContent = app.S.playing ? '⏸' : '▶';
+  if (btn) btn.innerHTML = app.S.playing ? ICON_PAUSE : ICON_PLAY;
 
   app.S.playing ? app.startPlay() : clearInterval(app.S.playTimer);
 
