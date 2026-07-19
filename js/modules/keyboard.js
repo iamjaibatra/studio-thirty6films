@@ -1,3 +1,5 @@
+import { ICON_PLAY } from './icons.js';
+
 export function initKeyboard(app) {
   document.addEventListener('keydown', e => {
     const t = e.target.tagName;
@@ -34,9 +36,14 @@ export function initKeyboard(app) {
       case 'j':
       case 'J':
         if (app.S.mode === 1 && fpOpen) {
-          app.S.playProg = Math.max(0, app.S.playProg - 0.04);
-          const f = document.getElementById('fp-fill');
-          if (f) f.style.width = `${app.S.playProg * 100}%`;
+          const vid = fp.querySelector('video');
+          if (vid && vid.duration) {
+            vid.currentTime = Math.max(0, vid.currentTime - vid.duration * 0.04);
+          } else {
+            app.S.playProg = Math.max(0, app.S.playProg - 0.04);
+            const f = document.getElementById('fp-fill');
+            if (f) f.style.width = `${app.S.playProg * 100}%`;
+          }
         }
         break;
       case 'k':
@@ -44,16 +51,22 @@ export function initKeyboard(app) {
         if (app.S.mode === 1 && fpOpen) {
           app.S.playing = false;
           clearInterval(app.S.playTimer);
+          fp.querySelector('video')?.pause();
           const b = document.getElementById('fp-play');
-          if (b) b.textContent = '▶';
+          if (b) b.innerHTML = ICON_PLAY;
         }
         break;
       case 'l':
       case 'L':
         if (app.S.mode === 1 && fpOpen) {
-          app.S.playProg = Math.min(1, app.S.playProg + 0.04);
-          const f = document.getElementById('fp-fill');
-          if (f) f.style.width = `${app.S.playProg * 100}%`;
+          const vid = fp.querySelector('video');
+          if (vid && vid.duration) {
+            vid.currentTime = Math.min(vid.duration, vid.currentTime + vid.duration * 0.04);
+          } else {
+            app.S.playProg = Math.min(1, app.S.playProg + 0.04);
+            const f = document.getElementById('fp-fill');
+            if (f) f.style.width = `${app.S.playProg * 100}%`;
+          }
         } else {
           app.S.gleak = !app.S.gleak;
           document.body.classList.toggle('gleak', app.S.gleak);
@@ -63,14 +76,14 @@ export function initKeyboard(app) {
       case 'ArrowLeft':
         if (app.S.mode === 1 && fpOpen) {
           app.openClip((app.S.playClip - 1 + window.T36.PROJECTS.length) % window.T36.PROJECTS.length);
-        } else {
+        } else if (!fpOpen) {
           app.switchMode(Math.max(0, app.S.mode - 1));
         }
         break;
       case 'ArrowRight':
         if (app.S.mode === 1 && fpOpen) {
           app.openClip((app.S.playClip + 1) % window.T36.PROJECTS.length);
-        } else {
+        } else if (!fpOpen) {
           app.switchMode(Math.min(5, app.S.mode + 1));
         }
         break;

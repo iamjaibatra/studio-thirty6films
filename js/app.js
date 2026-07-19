@@ -9,7 +9,7 @@ import { bootApp } from './modules/boot.js';
 import { initCursor, startTimecode, initResize } from './modules/core.js';
 import { initModes, switchMode } from './modules/mode.js';
 import { initShoot, updateLV, toggleREC, applyShootContent } from './modules/shoot.js';
-import { initPlayback, openClip, closeClip, togglePlay, startPlay } from './modules/playback.js';
+import { initPlayback, openClip, closeClip, togglePlay, startPlay, openLightbox } from './modules/playback.js';
 import { buildArchive, applyArchiveContent } from './modules/archive.js';
 import { buildEdit, selectStage, initPlayhead, initSliders, applyGrade, applyEditContent } from './modules/edit.js';
 import { buildLenses } from './modules/lenses.js';
@@ -130,6 +130,9 @@ const CinemaOS = {
 
   closeClip() {
     closeClip(this);
+  },
+  openLightbox(opts) {
+    openLightbox(this, opts);
   },
 
   togglePlay() {
@@ -291,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyTransmitContent(CinemaOS, results.transmit.content, results.services);
   applyArchiveContent(results.archiveContent.content, results.archiveItems);
   applyEditContent(CinemaOS, results.timelineStages, results.editContent.grader_defaults);
-  buildLenses(results.services);
+  buildLenses(results.services, CinemaOS);
 
   if (anyFailed || results.projects.error) {
     // Genuinely empty (no published projects yet) is a normal state

@@ -12,10 +12,9 @@ function slugify(text) {
 }
 
 /**
- * Fetches published projects (featured first, then newest) and maps the
- * real `projects` table columns (title, slug, client, category, year,
- * description, duration, featured, published, thumbnail, video) into the
- * shape playback.js / keyboard.js already render.
+ * Fetches published projects in the exact manual order set in the CMS
+ * (Projects → drag to reorder). The "Featured" filter pill still narrows
+ * which cards show, independent of this base ordering.
  *
  * Note: the original mock data included per-project lens/fps/codec
  * numbers. Those aren't real fields in the CMS, so rather than fabricate
@@ -32,11 +31,10 @@ export async function loadProjects() {
   const { data, error } = await supabase
     .from('projects')
     .select(
-      'id, title, slug, client, category, year, description, duration, featured, thumbnail, video, hover_video, credits, created_at'
+      'id, title, slug, client, category, year, description, duration, featured, thumbnail, video, hover_video, credits, display_order, created_at'
     )
     .eq('published', true)
-    .order('featured', { ascending: false })
-    .order('created_at', { ascending: false });
+    .order('display_order', { ascending: true });
 
   if (error) {
     return { projects: [], error };

@@ -18,9 +18,12 @@ export function switchMode(app, n) {
   const nextMode = Number(n);
   if (Number.isNaN(nextMode) || nextMode === app.S.mode) return;
 
-  // Dismiss any open mobile keyboard/native picker tied to a focused form
-  // control on the page being left — otherwise that native UI (which is
-  // outside CSS's control) can remain visible over the next page.
+  // Blur any focused control before switching — handles the on-screen
+  // keyboard for text inputs reliably. The deeper fix for native <select>
+  // pickers is in css/main.css: .page now toggles `visibility` alongside
+  // `opacity`, since visibility (not opacity) is what actually removes an
+  // element from the browser's interaction/accessibility tree — which is
+  // what determines whether an open native picker gets dismissed.
   const active = document.activeElement;
   if (active && typeof active.blur === 'function' && active !== document.body) {
     active.blur();

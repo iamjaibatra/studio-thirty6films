@@ -1,3 +1,5 @@
+import { ICON_PLAY } from './icons.js';
+
 /**
  * Renders the Lens Cabinet from real service data. The decorative
  * "lens optic" graphic (rings + focal number) stays exactly as-is by
@@ -5,7 +7,7 @@
  * set, and an icon renders as a small badge — none of that existing
  * decoration is removed, only enriched when content is provided.
  */
-export function buildLenses(services = []) {
+export function buildLenses(services = [], app) {
   const shelf = document.getElementById('lens-shelf');
   if (!shelf) return;
 
@@ -14,23 +16,32 @@ export function buildLenses(services = []) {
   services.forEach(l => {
     const specs = l.specs || {};
     const deliverables = Array.isArray(specs.deliverables) ? specs.deliverables : [];
+    const hasVideo = Boolean(l.videoUrl);
 
     const d = document.createElement('div');
-    d.className = 'lens-card';
+    d.className = hasVideo ? 'lens-card has-video' : 'lens-card';
 
     let mediaHtml = '';
-    if (l.videoUrl) {
-      mediaHtml = `<video class="lens-vis-media" src="${l.videoUrl}" autoplay muted loop playsinline></video>`;
+    if (hasVideo) {
+      // preload="metadata" + an explicit poster (when available) ensures
+      // something correct is visible even if a mobile browser's autoplay
+      // policy blocks playback of several simultaneous videos — without
+      // this, a blocked autoplay can render as a blank/black square that
+      // looks like the card has no media at all.
+      const posterAttr = l.imageUrl ? ` poster="${l.imageUrl}"` : '';
+      mediaHtml = `<video class="lens-vis-media" src="${l.videoUrl}"${posterAttr} autoplay muted loop playsinline preload="metadata"></video>`;
     } else if (l.imageUrl) {
       mediaHtml = `<img class="lens-vis-media" src="${l.imageUrl}" alt="" />`;
     }
 
     const iconHtml = l.iconUrl ? `<div class="lens-icon-badge"><img src="${l.iconUrl}" alt="" /></div>` : '';
+    const playHintHtml = hasVideo ? `<div class="lens-play-hint">${ICON_PLAY}</div>` : '';
 
     d.innerHTML = `
       <div class="lens-vis">
         ${mediaHtml}
         ${iconHtml}
+        ${playHintHtml}
         <div class="l-flare"></div><div class="l-gloss"></div>
         <div class="lens-optic">
           <div class="lo"></div><div class="lo"></div>
@@ -51,6 +62,20 @@ export function buildLenses(services = []) {
         ${l.price ? `<div class="lb-price">${l.price}</div>` : ''}
       </div>`;
     shelf.appendChild(d);
+
+    if (hasVideo) {
+      // Explicit play() call as well as the autoplay attribute — belt and
+      // suspenders for browsers that are stricter about attribute-only
+      // autoplay, especially with several videos on screen at once.
+      const videoEl = d.querySelector('video');
+      videoEl?.play().catch(() => {});
+
+      if (app) {
+        d.querySelector('.lens-vis').addEventListener('click', () => {
+          app.openLightbox({ title: l.title, videoUrl: l.videoUrl });
+        });
+      }
+    }
   });
 
   if (!services.length) {

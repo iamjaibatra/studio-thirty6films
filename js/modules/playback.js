@@ -230,6 +230,7 @@ export function openClip(app, idx) {
 
   app.S.playClip = idx;
   app.S.playing = true;
+  setProjectNavVisible(true);
 
   const fp = document.getElementById('fp');
   if (!fp) return;
@@ -265,6 +266,63 @@ export function openClip(app, idx) {
   document.getElementById('fp-info-panel')?.classList.remove('on');
   renderCredits(p.credits);
   loadProjectGallery(p.id).then(renderGallery).catch(() => renderGallery([]));
+
+  app.startPlay();
+}
+
+function setProjectNavVisible(visible) {
+  const display = visible ? '' : 'none';
+  const prev = document.getElementById('fp-prev');
+  const next = document.getElementById('fp-next');
+  if (prev) prev.style.display = display;
+  if (next) next.style.display = display;
+}
+
+/**
+ * Opens a standalone video in the same fullscreen player used for
+ * projects (Lenses service videos) — reuses the existing #fp overlay
+ * rather than introducing a separate lightbox UI. Prev/next (which only
+ * make sense for the projects list) are hidden, and the credits/gallery
+ * panel is empty since a service isn't a project.
+ */
+export function openLightbox(app, { title, videoUrl }) {
+  if (!videoUrl) return;
+
+  const fp = document.getElementById('fp');
+  if (!fp) return;
+  fp.classList.add('on');
+
+  app.S.playClip = null;
+  app.S.playing = true;
+  setProjectNavVisible(false);
+
+  const fpBg = document.getElementById('fp-bg');
+  if (fpBg) {
+    fpBg.className = 'fp-bg';
+    fpBg.style.backgroundImage = '';
+  }
+
+  let vid = fp.querySelector('video');
+  if (!vid) {
+    vid = document.createElement('video');
+    vid.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:1;';
+    fp.querySelector('.fp-scr').appendChild(vid);
+  }
+  vid.src = videoUrl;
+  vid.muted = false;
+  vid.loop = true;
+  vid.play().catch(() => {});
+
+  const titleEl = document.getElementById('fp-title');
+  if (titleEl) titleEl.textContent = title || '';
+  resetTitleIdleTimer();
+
+  const playBtn = document.getElementById('fp-play');
+  if (playBtn) playBtn.innerHTML = ICON_PAUSE;
+
+  document.getElementById('fp-info-panel')?.classList.remove('on');
+  renderCredits([]);
+  renderGallery([]);
 
   app.startPlay();
 }
@@ -315,6 +373,7 @@ export function closeClip(app) {
   document.getElementById('fp-info-panel')?.classList.remove('on');
   clearTimeout(titleIdleTimer);
   document.getElementById('fp-title')?.classList.remove('fp-idle');
+  setProjectNavVisible(true);
   app.S.playing = false;
   clearInterval(app.S.playTimer);
   app.S.playProg = 0;

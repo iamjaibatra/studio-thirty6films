@@ -71,9 +71,10 @@ export async function loadArchiveItems() {
 }
 
 /**
- * Edit page timeline stages, ordered. video_media_id and project_id both
- * have real FKs (verified via pg_constraint), so the embedded joins here
- * are safe.
+ * Edit page timeline stages, ordered. media_id (renamed from
+ * video_media_id — now holds either an image or a video) and project_id
+ * both have real FKs (verified via pg_constraint), so the embedded joins
+ * here are safe.
  */
 export async function loadTimelineStages() {
   if (!supabase) return [];
@@ -81,7 +82,7 @@ export async function loadTimelineStages() {
   const { data, error } = await supabase
     .from('timeline_stages')
     .select(
-      'id, label, description, stage_order, video:video_media_id ( url ), project:project_id ( title, client )'
+      'id, label, description, stage_order, media:media_id ( url, type ), project:project_id ( title, client )'
     )
     .order('stage_order', { ascending: true });
 
@@ -94,7 +95,8 @@ export async function loadTimelineStages() {
     id: row.id,
     label: row.label,
     description: row.description,
-    videoUrl: row.video?.url || null,
+    mediaUrl: row.media?.url || null,
+    mediaType: row.media?.type || null, // 'image' | 'video' | null
     projectTitle: row.project?.title || null,
     projectClient: row.project?.client || null,
   }));

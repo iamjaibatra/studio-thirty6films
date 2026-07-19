@@ -166,11 +166,14 @@ function applyBackgroundMedia(hero) {
   const gradientBg = document.getElementById('lv-bg');
   if (!container) return;
 
-  if (hero.background_video_url) {
+  const isMobile = window.innerWidth <= 768;
+  const videoUrl = (isMobile && hero.background_video_mobile_url) || hero.background_video_url;
+
+  if (videoUrl) {
     gradientBg?.style.setProperty('display', 'none');
     const video = document.createElement('video');
     video.className = 'lv-real-bg';
-    video.src = hero.background_video_url;
+    video.src = videoUrl;
     if (hero.fallback_image_url) video.poster = hero.fallback_image_url;
     video.autoplay = true;
     video.muted = true;

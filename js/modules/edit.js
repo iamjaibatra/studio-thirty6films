@@ -1,5 +1,15 @@
+import { ICON_PLAY, ICON_PAUSE } from './icons.js';
+
 const BIN_STILLS = ['s1', 's2', 's3', 's4', 's1', 's5', 's6', 's2', 's4', 's3']; // cycles for any stage count
 const NOMINAL_RUNTIME_SECONDS = 9 * 60 + 24; // ~09:24, matches the original decorative timecode range
+// How long a full 0→100% playhead sweep takes in real seconds. This is a
+// UI pacing choice for the decorative preview reel (not fabricated project
+// data) — same category as NOMINAL_RUNTIME_SECONDS above, which was
+// already an established decorative display value from the prior sprint.
+const PLAYBACK_SWEEP_SECONDS = 24;
+const TICK_MS = 100;
+const PROG_PER_TICK = 100 / ((PLAYBACK_SWEEP_SECONDS * 1000) / TICK_MS);
+const SCRUB_STEP_PCT = 100 / 24; // ~half a stage-width for a typical 9-stage project
 
 let currentStages = [];
 
@@ -10,6 +20,7 @@ export function buildEdit(app) {
   buildRuler();
   buildWaveforms();
   bindStaticTimelineClips(app);
+  bindTransportControls(app);
   app.initPlayhead();
   app.initSliders();
 }
@@ -30,10 +41,23 @@ function bindStaticTimelineClips(app) {
 }
 
 /**
+ * Wires the 5 existing transport buttons to real playback behaviour.
+ * These buttons already existed in the markup but had no click handlers
+ * at all — clicking any of them previously did nothing.
+ */
+function bindTransportControls(app) {
+  document.getElementById('ep-play')?.addEventListener('click', () => toggleEditPlay(app));
+  document.getElementById('ep-prev-stage')?.addEventListener('click', () => stepStage(app, -1));
+  document.getElementById('ep-next-stage')?.addEventListener('click', () => stepStage(app, 1));
+  document.getElementById('ep-rewind')?.addEventListener('click', () => scrubEdit(app, -SCRUB_STEP_PCT));
+  document.getElementById('ep-forward')?.addEventListener('click', () => scrubEdit(app, SCRUB_STEP_PCT));
+}
+
+/**
  * Applies CMS-driven content: the project bin, preview monitor
  * captions, the V1 timeline track, and the grader panel's default
  * values. The V2/FX/A1/MX tracks stay as decorative NLE-suite dressing —
- * they were never tied to real distinct content, only the 9 stages were.
+ * they were never tied to real distinct content, only the stages were.
  */
 export function applyEditContent(app, stages = [], graderDefaults = {}) {
   currentStages = stages;
@@ -43,6 +67,7 @@ export function applyEditContent(app, stages = [], graderDefaults = {}) {
   renderTimelineTrack(app, stages);
   applyGraderDefaults(app, graderDefaults);
 
+  stopEditPlayback(app);
   if (stages.length) selectStage(app, 0);
 }
 
@@ -153,77 +178,188 @@ function truncate(text, max) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
-export function selectStage(app, i) {
+function segmentWidthPct() {
+  return currentStages.length ? 100 / currentStages.length : 100;
+}
+
+function stageIndexForProgress(progressPct) {
+  const n = currentStages.length;
+  if (!n) return 0;
+  return Math.max(0, Math.min(n - 1, Math.floor(progressPct / segmentWidthPct())));
+}
+
+function setPlayheadPosition(progressPct) {
+  ['tl-ph', 'tl-rph'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.left = `${progressPct}%`;
+  });
+
+  const totalSeconds = Math.round((progressPct / 100) * NOMINAL_RUNTIME_SECONDS);
+  const tc = document.getElementById('ep-tc');
+  if (tc) tc.textContent = `00:${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}:00`;
+}
+
+/** Updates captions/bin/media for a stage without moving the playhead — used during continuous playback. */
+function renderStageUI(app, i) {
   app.S.editStage = i;
   document.querySelectorAll('.bin-row').forEach((r, j) => r.classList.toggle('sel', j === i));
   document.querySelectorAll('.ep-stage').forEach(s => s.classList.remove('on'));
   document.getElementById(`es${i}`)?.classList.add('on');
-
-  const n = currentStages.length || 1;
-  const p = n > 1 ? (i / (n - 1)) * 100 : 0;
-  ['tl-ph', 'tl-rph'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.left = `${p}%`;
-  });
-
-  const totalSeconds = Math.round((p / 100) * NOMINAL_RUNTIME_SECONDS);
-  const tc = document.getElementById('ep-tc');
-  if (tc) tc.textContent = `00:${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}:00`;
-
-  applyStageVideo(currentStages[i]);
+  applyStageMedia(currentStages[i]);
 }
 
-function applyStageVideo(stage) {
+/** Jumps directly to a stage (bin click, timeline click, next/prev buttons) — moves the playhead too. */
+export function selectStage(app, i) {
+  const n = currentStages.length;
+  if (!n) return;
+  const clamped = Math.max(0, Math.min(n - 1, i));
+
+  app.S.editProg = clamped * segmentWidthPct();
+  setPlayheadPosition(app.S.editProg);
+  renderStageUI(app, clamped);
+}
+
+function stepStage(app, direction) {
+  const n = currentStages.length;
+  if (!n) return;
+  const next = Math.max(0, Math.min(n - 1, app.S.editStage + direction));
+  selectStage(app, next);
+}
+
+function scrubEdit(app, deltaPct) {
+  const n = currentStages.length;
+  if (!n) return;
+
+  app.S.editProg = Math.max(0, Math.min(100, app.S.editProg + deltaPct));
+  setPlayheadPosition(app.S.editProg);
+
+  const newIndex = stageIndexForProgress(app.S.editProg);
+  if (newIndex !== app.S.editStage) renderStageUI(app, newIndex);
+}
+
+function toggleEditPlay(app) {
+  if (app.S.editPlaying) {
+    stopEditPlayback(app);
+  } else {
+    startEditPlayback(app);
+  }
+}
+
+function startEditPlayback(app) {
+  if (!currentStages.length) return;
+  // Reaching the end previously — start over from the beginning, like
+  // pressing play again after a program finishes.
+  if (app.S.editProg >= 100) {
+    app.S.editProg = 0;
+    setPlayheadPosition(0);
+    renderStageUI(app, 0);
+  }
+
+  app.S.editPlaying = true;
+  const btn = document.getElementById('ep-play');
+  if (btn) btn.innerHTML = ICON_PAUSE;
+
+  clearInterval(app.S.editTimer);
+  app.S.editTimer = setInterval(() => {
+    app.S.editProg = Math.min(100, app.S.editProg + PROG_PER_TICK);
+    setPlayheadPosition(app.S.editProg);
+
+    const newIndex = stageIndexForProgress(app.S.editProg);
+    if (newIndex !== app.S.editStage) renderStageUI(app, newIndex);
+
+    if (app.S.editProg >= 100) stopEditPlayback(app);
+  }, TICK_MS);
+}
+
+function stopEditPlayback(app) {
+  app.S.editPlaying = false;
+  clearInterval(app.S.editTimer);
+  const btn = document.getElementById('ep-play');
+  if (btn) btn.innerHTML = ICON_PLAY;
+}
+
+/**
+ * Renders whichever media type a stage has — image or video (the
+ * timeline_stages.media_id column can point to either now). Falls back
+ * to the decorative gradient when a stage has no media at all.
+ */
+function applyStageMedia(stage) {
   const grade = document.querySelector('.ep-grade');
   if (!grade) return;
 
-  let video = document.getElementById('ep-video');
-  if (stage?.videoUrl) {
-    if (!video) {
-      video = document.createElement('video');
-      video.id = 'ep-video';
-      video.className = 'ep-grade-vid';
-      video.autoplay = true;
-      video.muted = true;
-      video.loop = true;
-      video.playsInline = true;
-      grade.insertBefore(video, grade.firstChild);
-    }
-    if (video.src !== stage.videoUrl) video.src = stage.videoUrl;
-    video.style.display = '';
-  } else if (video) {
-    video.style.display = 'none';
+  const existing = document.getElementById('ep-stage-media');
+  const wantsVideo = stage?.mediaType === 'video';
+  const wantsImage = stage?.mediaType === 'image';
+
+  if (!stage?.mediaUrl) {
+    if (existing) existing.style.display = 'none';
+    return;
   }
+
+  // If the existing element is the wrong tag for this stage's media type,
+  // remove it and create the right one.
+  if (existing && ((wantsVideo && existing.tagName !== 'VIDEO') || (wantsImage && existing.tagName !== 'IMG'))) {
+    existing.remove();
+  }
+
+  let media = document.getElementById('ep-stage-media');
+  if (!media) {
+    media = document.createElement(wantsVideo ? 'video' : 'img');
+    media.id = 'ep-stage-media';
+    media.className = 'ep-grade-vid';
+    if (wantsVideo) {
+      media.autoplay = true;
+      media.muted = true;
+      media.loop = true;
+      media.playsInline = true;
+    } else {
+      media.alt = '';
+    }
+    grade.insertBefore(media, grade.firstChild);
+  }
+
+  if (media.src !== stage.mediaUrl) media.src = stage.mediaUrl;
+  media.style.display = '';
 }
 
 export function initPlayhead(app) {
   const cnt = document.getElementById('tl-cnt');
   if (!cnt) return;
 
-  const movePH = e => {
+  const movePH = clientX => {
     const r = cnt.getBoundingClientRect();
-    const p = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
-    ['tl-ph', 'tl-rph'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.left = `${p}%`;
-    });
-    const n = currentStages.length || 1;
-    const pcts = currentStages.map((_, idx) => (n > 1 ? (idx / (n - 1)) * 100 : 0));
-    const closest = pcts.reduce((acc, value, index) => Math.abs(value - p) < Math.abs(pcts[acc] - p) ? index : acc, 0);
-    if (closest !== app.S.editStage) app.selectStage(closest);
+    const p = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
+    app.S.editProg = p;
+    setPlayheadPosition(p);
+
+    const newIndex = stageIndexForProgress(p);
+    if (newIndex !== app.S.editStage) renderStageUI(app, newIndex);
   };
 
   cnt.addEventListener('mousedown', e => {
     app.S.tlDrag = true;
-    movePH(e);
+    movePH(e.clientX);
     document.body.style.userSelect = 'none';
   });
   document.addEventListener('mousemove', e => {
-    if (app.S.tlDrag) movePH(e);
+    if (app.S.tlDrag) movePH(e.clientX);
   }, { passive: true });
   document.addEventListener('mouseup', () => {
     app.S.tlDrag = false;
     document.body.style.userSelect = '';
+  });
+
+  // Touch equivalents — dragging the playhead previously only worked
+  // with a mouse, so this was non-functional on mobile/tablet.
+  cnt.addEventListener('touchstart', e => {
+    app.S.tlDrag = true;
+    movePH(e.touches[0].clientX);
+  }, { passive: true });
+  cnt.addEventListener('touchmove', e => {
+    if (app.S.tlDrag) movePH(e.touches[0].clientX);
+  }, { passive: true });
+  cnt.addEventListener('touchend', () => {
+    app.S.tlDrag = false;
   });
 }
 
@@ -233,9 +369,9 @@ export function initSliders(app) {
     const thumb = track.querySelector('.sl-thumb');
     let drag = false;
 
-    const upd = e => {
+    const upd = clientX => {
       const r = track.getBoundingClientRect();
-      const p = Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100));
+      const p = Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100));
       if (fill) fill.style.width = `${p}%`;
       if (thumb) thumb.style.left = `${p}%`;
       track.dataset.v = p;
@@ -244,13 +380,25 @@ export function initSliders(app) {
 
     track.addEventListener('mousedown', e => {
       drag = true;
-      upd(e);
+      upd(e.clientX);
       e.stopPropagation();
     });
     document.addEventListener('mousemove', e => {
-      if (drag) upd(e);
+      if (drag) upd(e.clientX);
     }, { passive: true });
     document.addEventListener('mouseup', () => {
+      drag = false;
+    });
+
+    track.addEventListener('touchstart', e => {
+      drag = true;
+      upd(e.touches[0].clientX);
+      e.stopPropagation();
+    }, { passive: true });
+    document.addEventListener('touchmove', e => {
+      if (drag) upd(e.touches[0].clientX);
+    }, { passive: true });
+    document.addEventListener('touchend', () => {
       drag = false;
     });
   });
@@ -258,7 +406,7 @@ export function initSliders(app) {
 
 export function applyGrade(app) {
   const bg = document.getElementById('ep-bg');
-  const video = document.getElementById('ep-video');
+  const media = document.getElementById('ep-stage-media');
 
   const g = p => {
     const el = document.querySelector(`.sl-track[data-p="${p}"]`);
@@ -272,7 +420,7 @@ export function applyGrade(app) {
   const filter = `brightness(${bri}) contrast(${con}) saturate(${sat}) hue-rotate(${hue}deg)`;
 
   if (bg) bg.style.filter = filter;
-  if (video) video.style.filter = filter;
+  if (media) media.style.filter = filter;
 }
 
 // Ruler ticks are static regardless of stage count/content — decorative,
