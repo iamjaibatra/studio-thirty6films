@@ -52,7 +52,8 @@
 
 .pb-grid {
   flex:1; display:grid; grid-template-columns:repeat(4,1fr);
-  gap:2px; padding:2px; overflow-y:auto; align-content:start; align-items:start;
+  gap:2px; padding:2px; overflow-y:auto; scrollbar-gutter:stable;
+  align-content:start; align-items:start;
 }
 
 .clip {
