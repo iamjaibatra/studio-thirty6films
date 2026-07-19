@@ -4,10 +4,31 @@ import { ICON_PLAY, ICON_PAUSE } from './icons.js';
 function applyStill(el, p, { crop = true } = {}) {
   if (p.thumbnail) {
     el.style.backgroundImage = `url("${p.thumbnail}")`;
-    el.style.backgroundSize = crop ? 'cover' : 'contain';
     el.style.backgroundPosition = 'center';
     el.style.backgroundRepeat = 'no-repeat';
-    if (!crop) el.style.backgroundColor = 'var(--panel)';
+
+    if (!crop) {
+      // Grid thumbnails: only letterbox when the source image's own aspect
+      // ratio is genuinely far from the card's 16:9 box (logos, portraits,
+      // square graphics). Photography that's already close to 16:9 uses
+      // cover instead — cropping a few percent off a photo is invisible,
+      // but letterbox bars on every card (even ones that don't need them)
+      // read as visual noise/false "overlap" between rows.
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundColor = 'var(--panel)';
+      const img = new Image();
+      img.onload = () => {
+        const cardRatio = 16 / 9;
+        const imgRatio = img.naturalWidth / img.naturalHeight;
+        const mismatch = Math.abs(imgRatio - cardRatio) / cardRatio;
+        if (mismatch > 0.25) {
+          el.style.backgroundSize = 'contain';
+        }
+      };
+      img.src = p.thumbnail;
+    } else {
+      el.style.backgroundSize = 'cover';
+    }
   } else if (p.still) {
     el.classList.add(p.still);
   }
