@@ -57,7 +57,15 @@
 }
 
 .clip {
-  position:relative; aspect-ratio:16/9;
+  position:relative; height:0; padding-bottom:56.25%; /* 16:9, via the classic
+    padding-percentage technique instead of the `aspect-ratio` property —
+    aspect-ratio has a documented timing conflict with CSS Grid's automatic
+    row-height calculation in some browsers, where the grid allocates a row
+    track before aspect-ratio's sizing is fully resolved, so every card ends
+    up taller than the space the grid reserved and spills into the next row.
+    padding-percentage is always computed from the element's own width and
+    has none of that ambiguity. Safe here because every child of .clip is
+    already position:absolute (confirmed below). */
   overflow:hidden; cursor:none; background:var(--panel);
   transition: transform .15s var(--ease-out);
 }

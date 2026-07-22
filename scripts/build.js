@@ -59,6 +59,7 @@ function copyRecursive(src, dest) {
 function computeVersion() {
   const hash = crypto.createHash('sha1');
   const jsDir = path.join(ROOT, 'js');
+  const cssDir = path.join(ROOT, 'css');
 
   function hashDir(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
@@ -68,6 +69,7 @@ function computeVersion() {
     }
   }
   hashDir(jsDir);
+  hashDir(cssDir);
   hash.update(fs.readFileSync(path.join(ROOT, 'data', 'content.js')));
 
   return hash.digest('hex').slice(0, 10);
