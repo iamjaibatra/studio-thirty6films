@@ -238,7 +238,7 @@ export function openClip(app, idx) {
   if (fpBg) {
     fpBg.className = 'fp-bg';
     fpBg.style.backgroundImage = '';
-    applyStill(fpBg, p);
+    if (!p.video) applyStill(fpBg, p);
   }
 
   if (p.video) {

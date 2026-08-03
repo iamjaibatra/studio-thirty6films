@@ -113,6 +113,8 @@ export function updateLV(app) {
 
 export function toggleREC(app) {
   app.S.rec = !app.S.rec;
+  if (app.S.rec) app.S.recFrame = 0;
+
   const btn = document.getElementById('hud-rec');
   const dot = document.getElementById('tb-recdot');
   const wrap = document.getElementById('tb-rec');

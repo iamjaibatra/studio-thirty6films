@@ -2,6 +2,7 @@ export function createAppState() {
   return {
     mode: 0,
     rec: false,
+    recFrame: 0,
     focusLocked: false,
     iso: 3200,
     ap: 1.8,

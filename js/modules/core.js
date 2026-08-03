@@ -36,7 +36,6 @@ export function initCursor(app) {
 }
 
 export function startTimecode(app) {
-  let f = (4 * 3600 + 17 * 60 + 22) * 24;
   const fmt = n => {
     const fr = n % 24;
     const s = Math.floor(n / 24) % 60;
@@ -45,13 +44,19 @@ export function startTimecode(app) {
     return [h, m, s, fr].map(x => String(x).padStart(2, '0')).join(':');
   };
 
-  setInterval(() => {
-    f++;
-    const tc = fmt(f);
+  const render = () => {
+    const tc = fmt(app.S.recFrame);
     ['tb-tc', 'bb-tc', 'hud-tc'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.textContent = tc;
     });
+  };
+  render(); // show 00:00:00:00 immediately, before any recording starts
+
+  setInterval(() => {
+    if (!app.S.rec) return; // frozen (holds its last value) while not recording
+    app.S.recFrame++;
+    render();
   }, 1000 / 24);
 }
 
