@@ -235,7 +235,7 @@
   transition:filter .13s;
 }
 .ep-grade-vid {
-  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:1;
   transition:filter .13s;
 }
 .ep-stage { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:26px; opacity:0; transition:opacity .2s; z-index:2; }
