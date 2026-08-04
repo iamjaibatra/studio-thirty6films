@@ -29,19 +29,30 @@ function renderContactSheet(items) {
 
     const negLayer = document.createElement('div');
     negLayer.className = `neg-neg n${(i % FALLBACK_COUNT) + 1}`;
-
-    const posLayer = document.createElement('div');
-    if (item.imageUrl) {
-      posLayer.className = 'neg-pos';
-      posLayer.style.backgroundImage = `url("${item.imageUrl}")`;
-      posLayer.style.backgroundSize = 'cover';
-      posLayer.style.backgroundPosition = 'center';
-    } else {
-      posLayer.className = `neg-pos p${(i % FALLBACK_COUNT) + 1}`;
-    }
-
     neg.appendChild(negLayer);
-    neg.appendChild(posLayer);
+
+    if (item.mediaType === 'video' && item.mediaUrl) {
+      const video = document.createElement('video');
+      video.className = 'neg-pos';
+      video.src = item.mediaUrl;
+      video.autoplay = true;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.play().catch(() => {});
+      neg.appendChild(video);
+    } else {
+      const posLayer = document.createElement('div');
+      if (item.mediaUrl) {
+        posLayer.className = 'neg-pos';
+        posLayer.style.backgroundImage = `url("${item.mediaUrl}")`;
+        posLayer.style.backgroundSize = 'cover';
+        posLayer.style.backgroundPosition = 'center';
+      } else {
+        posLayer.className = `neg-pos p${(i % FALLBACK_COUNT) + 1}`;
+      }
+      neg.appendChild(posLayer);
+    }
 
     const info = document.createElement('div');
     info.className = 'neg-info';

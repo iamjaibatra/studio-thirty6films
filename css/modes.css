@@ -166,11 +166,11 @@
 }
 .media-lbl::before { content:''; width:12px; height:1px; background:var(--red); display:block; }
 
-.cs-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:3px; margin-bottom:18px; }
-.neg { position:relative; aspect-ratio:4/3; overflow:hidden; cursor:none; }
+.cs-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; margin-bottom:18px; }
+.neg { position:relative; height:0; padding-bottom:75%; overflow:hidden; cursor:none; } /* 4:3 via padding-percentage, not aspect-ratio — see the identical fix on .clip and .lens-vis for why */
 .neg:hover .neg-info { opacity:1; }
 .neg-neg { position:absolute; inset:0; }
-.neg-pos { position:absolute; inset:0; opacity:1; }
+.neg-pos { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:1; }
 .neg-num { position:absolute; bottom:3px; right:4px; font-family:'JetBrains Mono',monospace; font-size:6.5px; color:rgba(244,244,244,.17); }
 .neg-info {
   position:absolute; inset:0; background:rgba(4,4,4,.76);

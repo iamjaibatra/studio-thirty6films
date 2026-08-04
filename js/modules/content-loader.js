@@ -52,7 +52,7 @@ export async function loadArchiveItems() {
 
   const { data, error } = await supabase
     .from('archive_items')
-    .select('id, title, category, metadata, display_order, media:media_id ( url, alt_text )')
+    .select('id, title, category, metadata, display_order, media:media_id ( url, type, alt_text )')
     .order('display_order', { ascending: true });
 
   if (error) {
@@ -65,7 +65,8 @@ export async function loadArchiveItems() {
     title: row.title,
     category: row.category,
     metadata: row.metadata || {},
-    imageUrl: row.media?.url || null,
+    mediaUrl: row.media?.url || null,
+    mediaType: row.media?.type || null, // 'image' | 'video' | null
     altText: row.media?.alt_text || '',
   }));
 }
