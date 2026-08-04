@@ -77,6 +77,33 @@ export function initPlayback(app) {
     return window.setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 50 }), 0);
   };
 
+  // Distinguish a genuine tap from a swipe-to-scroll: track whether the
+  // touch moved beyond a small threshold, and have each card's click
+  // handler skip opening if the click follows a swipe. (Calling
+  // preventDefault() on touchend does NOT reliably suppress the
+  // browser's synthetic click here — Chromium's tap/scroll gesture
+  // classification is decided incrementally during touchmove, not
+  // retroactively at release, so that approach was tested and found
+  // unreliable. Gating the actual action in the click handler itself is
+  // the standard, robust pattern used by carousel/gallery libraries for
+  // exactly this problem.)
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchMoved = false;
+  const TAP_MOVE_THRESHOLD = 10; // px
+
+  grid.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchMoved = false;
+  }, { passive: true });
+
+  grid.addEventListener('touchmove', e => {
+    const dx = Math.abs(e.touches[0].clientX - touchStartX);
+    const dy = Math.abs(e.touches[0].clientY - touchStartY);
+    if (dx > TAP_MOVE_THRESHOLD || dy > TAP_MOVE_THRESHOLD) touchMoved = true;
+  }, { passive: true });
+
   projects.forEach((p, i) => {
     const d = document.createElement('div');
     d.className = 'clip';
@@ -149,7 +176,10 @@ export function initPlayback(app) {
       const psFile = document.getElementById('ps-file');
       if (psFile) psFile.textContent = String(i + 1).padStart(3, '0');
     });
-    d.addEventListener('click', () => app.openClip(i));
+    d.addEventListener('click', () => {
+      if (touchMoved) return;
+      app.openClip(i);
+    });
     d.addEventListener('keydown', e => {
       if (e.key === 'Enter' || e.key === ' ') app.openClip(i);
     });
