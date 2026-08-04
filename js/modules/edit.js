@@ -312,8 +312,20 @@ function applyStageMedia(stage) {
       media.muted = true;
       media.loop = true;
       media.playsInline = true;
+      media.addEventListener('error', () => {
+        console.error(
+          `[T36] Edit stage video failed to load or decode: ${media.src}. ` +
+            'If this is a .mov file, it may be HEVC-encoded (a common default on iPhone/Mac exports) — ' +
+            'most browsers other than Safari cannot play HEVC video natively. Re-export as H.264 in an .mp4 container.'
+        );
+        media.style.display = 'none';
+      });
     } else {
       media.alt = '';
+      media.addEventListener('error', () => {
+        console.error(`[T36] Edit stage image failed to load: ${media.src}`);
+        media.style.display = 'none';
+      });
     }
     grade.insertBefore(media, grade.firstChild);
   }

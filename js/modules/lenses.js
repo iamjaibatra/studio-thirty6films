@@ -71,7 +71,7 @@ export function buildLenses(services = [], app) {
       videoEl?.play().catch(() => {});
 
       if (app) {
-        d.querySelector('.lens-vis').addEventListener('click', () => {
+        d.addEventListener('click', () => {
           app.openLightbox({ title: l.title, videoUrl: l.videoUrl });
         });
       }

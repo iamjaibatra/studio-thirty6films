@@ -115,7 +115,7 @@ export function initKeyboard(app) {
         break;
       case 'd':
       case 'D':
-        app.toast('"Every frame is a decision, not an accident." — Studio Thirty6', 3500);
+        app.toast('"Every frame is a decision, not an accident." — Studio Thirty6 Films', 3500);
         break;
       case '?':
         app.toggleShortcuts();

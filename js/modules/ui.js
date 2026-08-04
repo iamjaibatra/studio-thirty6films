@@ -46,6 +46,7 @@ export function toggleUI(app) {
 }
 
 export function toggleShortcuts(app) {
+  if (app.S.isMobile) return;
   document.getElementById('shorts')?.classList.toggle('on');
 }
 

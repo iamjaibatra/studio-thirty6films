@@ -186,7 +186,28 @@ export function initPlayback(app) {
     grid.appendChild(d);
   });
 
-  document.getElementById('pb-filters')?.addEventListener('click', e => {
+  // Same tap-vs-swipe distinction as the grid above, applied to the
+  // horizontally-scrollable filter pill bar.
+  let filterTouchStartX = 0;
+  let filterTouchStartY = 0;
+  let filterTouchMoved = false;
+  const filterBar = document.getElementById('pb-filters');
+
+  filterBar?.addEventListener('touchstart', e => {
+    filterTouchStartX = e.touches[0].clientX;
+    filterTouchStartY = e.touches[0].clientY;
+    filterTouchMoved = false;
+  }, { passive: true });
+
+  filterBar?.addEventListener('touchmove', e => {
+    const dx = Math.abs(e.touches[0].clientX - filterTouchStartX);
+    const dy = Math.abs(e.touches[0].clientY - filterTouchStartY);
+    if (dx > TAP_MOVE_THRESHOLD || dy > TAP_MOVE_THRESHOLD) filterTouchMoved = true;
+  }, { passive: true });
+
+  filterBar?.addEventListener('click', e => {
+    if (filterTouchMoved) return;
+
     const btn = e.target.closest('.pf');
     if (!btn) return;
 
