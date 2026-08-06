@@ -82,5 +82,23 @@ export function buildLenses(categories = [], projects = [], app) {
     empty.className = 'lens-empty';
     empty.textContent = 'No categories yet.';
     shelf.appendChild(empty);
+    return;
   }
+
+  applyLensVisHeights();
+  window.removeEventListener('resize', applyLensVisHeights);
+  window.addEventListener('resize', applyLensVisHeights, { passive: true });
+}
+
+/**
+ * Sets each .lens-vis box's height explicitly, in px, to match its own
+ * actual rendered width (1:1 square) — see the comment on .lens-vis in
+ * css/modes.css for why this is done in JS rather than via CSS
+ * aspect-ratio or padding-percentage.
+ */
+function applyLensVisHeights() {
+  document.querySelectorAll('.lens-vis').forEach(el => {
+    const width = el.getBoundingClientRect().width;
+    if (width > 0) el.style.height = `${width}px`;
+  });
 }
