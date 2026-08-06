@@ -1,87 +1,86 @@
 import { ICON_PLAY } from './icons.js';
+import { slugify } from './data-loader.js';
 
 /**
- * Renders the Lens Cabinet from real service data. The decorative
- * "lens optic" graphic (rings + focal number) stays exactly as-is by
- * default; a real image/video is shown as a backdrop behind it when
- * set, and an icon renders as a small badge — none of that existing
- * decoration is removed, only enriched when content is provided.
+ * Lens Cabinet — one card per project CATEGORY (not per "service" as in
+ * earlier versions of this page). Each card shows a representative video
+ * from a real published project in that category (the first one, in the
+ * site's existing display order); categories with no projects yet still
+ * get a card (per explicit request — "make sure lenses page has all
+ * categories"), just with the decorative fallback instead of real media.
+ * Clicking a card navigates to Playback filtered to that category.
+ *
+ * @param {Array} categories - from loadCategories(): [{ id, name, color }]
+ * @param {Array} projects - from loadProjects(), already fetched/ordered
+ *   elsewhere in the parallel fetch — reused here to avoid a second
+ *   network round-trip just to find one representative clip per category.
+ * @param {object} app - CinemaOS, for navigating to Playback on click.
  */
-export function buildLenses(services = [], app) {
+export function buildLenses(categories = [], projects = [], app) {
   const shelf = document.getElementById('lens-shelf');
   if (!shelf) return;
 
   shelf.innerHTML = '';
 
-  services.forEach(l => {
-    const specs = l.specs || {};
-    const deliverables = Array.isArray(specs.deliverables) ? specs.deliverables : [];
-    const hasVideo = Boolean(l.videoUrl);
+  categories.forEach(cat => {
+    const slug = slugify(cat.name);
+    const repProject = projects.find(p => p.categorySlug === slug);
+    const hasVideo = Boolean(repProject?.video);
 
     const d = document.createElement('div');
     d.className = hasVideo ? 'lens-card has-video' : 'lens-card';
 
     let mediaHtml = '';
     if (hasVideo) {
-      // preload="metadata" + an explicit poster (when available) ensures
-      // something correct is visible even if a mobile browser's autoplay
-      // policy blocks playback of several simultaneous videos — without
-      // this, a blocked autoplay can render as a blank/black square that
-      // looks like the card has no media at all.
-      const posterAttr = l.imageUrl ? ` poster="${l.imageUrl}"` : '';
-      mediaHtml = `<video class="lens-vis-media" src="${l.videoUrl}"${posterAttr} autoplay muted loop playsinline preload="metadata"></video>`;
-    } else if (l.imageUrl) {
-      mediaHtml = `<img class="lens-vis-media" src="${l.imageUrl}" alt="" />`;
+      const posterAttr = repProject.thumbnail ? ` poster="${repProject.thumbnail}"` : '';
+      mediaHtml = `<video class="lens-vis-media" src="${repProject.video}"${posterAttr} autoplay muted loop playsinline preload="metadata"></video>`;
+    } else if (repProject?.thumbnail) {
+      mediaHtml = `<img class="lens-vis-media" src="${repProject.thumbnail}" alt="" />`;
     }
 
-    const iconHtml = l.iconUrl ? `<div class="lens-icon-badge"><img src="${l.iconUrl}" alt="" /></div>` : '';
     const playHintHtml = hasVideo ? `<div class="lens-play-hint">${ICON_PLAY}</div>` : '';
+    const projectCount = projects.filter(p => p.categorySlug === slug).length;
 
     d.innerHTML = `
       <div class="lens-vis">
         ${mediaHtml}
-        ${iconHtml}
         ${playHintHtml}
         <div class="l-flare"></div><div class="l-gloss"></div>
         <div class="lens-optic">
           <div class="lo"></div><div class="lo"></div>
           <div class="lo"></div><div class="lo"></div>
-          <div class="lo-c"><span class="lo-f">${specs.focal || ''}</span></div>
+          <div class="lo-c"><span class="lo-f" style="color:${cat.color || 'inherit'}">${projectCount || ''}</span></div>
         </div>
       </div>
       <div class="lens-body">
-        <div class="lb-sp">${specs.aperture_spec || ''}</div>
-        <div class="lb-ti">${l.title || ''}</div>
-        <div class="lb-de">${l.description || ''}</div>
-        <div class="lb-mt">
-          <div class="lm">Format<br><span>${specs.format || '—'}</span></div>
-          <div class="lm">Duration<br><span>${l.duration || '—'}</span></div>
-          <div class="lm">DOF<br><span>${specs.dof || '—'}</span></div>
-        </div>
-        ${deliverables.length ? `<div class="lb-dl">${deliverables.map(x => `<span>${x}</span>`).join('')}</div>` : ''}
-        ${l.price ? `<div class="lb-price">${l.price}</div>` : ''}
+        <div class="lb-sp" style="color:${cat.color || 'var(--t3)'}">Category</div>
+        <div class="lb-ti">${cat.name}</div>
+        <div class="lb-de">${projectCount ? `${projectCount} project${projectCount === 1 ? '' : 's'}` : 'No projects yet'}</div>
       </div>`;
     shelf.appendChild(d);
 
     if (hasVideo) {
-      // Explicit play() call as well as the autoplay attribute — belt and
-      // suspenders for browsers that are stricter about attribute-only
-      // autoplay, especially with several videos on screen at once.
       const videoEl = d.querySelector('video');
       videoEl?.play().catch(() => {});
+    }
 
-      if (app) {
-        d.addEventListener('click', () => {
-          app.openLightbox({ title: l.title, videoUrl: l.videoUrl });
-        });
-      }
+    if (app) {
+      d.addEventListener('click', () => {
+        app.switchMode(1); // Playback
+        // The filter pills are (re)built each time Playback's project
+        // grid renders; give it a beat to exist before clicking one.
+        setTimeout(() => {
+          const pill = document.querySelector(`.pf[data-f="${slug}"]`);
+          pill?.click();
+        }, 50);
+      });
     }
   });
 
-  if (!services.length) {
+  if (!categories.length) {
     const empty = document.createElement('p');
     empty.className = 'lens-empty';
-    empty.textContent = 'No services published yet.';
+    empty.textContent = 'No categories yet.';
     shelf.appendChild(empty);
   }
 }

@@ -9,6 +9,25 @@ import { supabase } from './supabase-client.js';
  * @returns {Promise<Record<string, object>>} e.g. { hero: {...}, hud: {...} }
  */
 /**
+ * All project categories, ordered by name. Used by the Lenses page to
+ * show one card per category (see js/modules/lenses.js).
+ */
+export async function loadCategories() {
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from('categories')
+    .select('id, name, color')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('[T36] Failed to load categories:', error);
+    return [];
+  }
+  return data ?? [];
+}
+
+/**
  * Enabled services, ordered. Used by Transmit's dropdown AND the Lenses
  * page — fetched once, shared, rather than querying twice.
  */

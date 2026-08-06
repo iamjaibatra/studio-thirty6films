@@ -2,7 +2,7 @@ import { supabase } from './supabase-client.js';
 
 const FALLBACK_STILL_COUNT = 8; // .s1–.s8 gradient classes exist in css/modes.css
 
-function slugify(text) {
+export function slugify(text) {
   return (text || 'uncategorized')
     .toString()
     .trim()

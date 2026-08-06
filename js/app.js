@@ -18,7 +18,10 @@ import { initShortcuts, toggleUI, toggleShortcuts, toggleNight, toggleAnamorphic
 import { initKeyboard } from './modules/keyboard.js';
 import { initMobileInteractions } from './modules/events.js';
 import { loadProjects } from './modules/data-loader.js';
-import { loadPageContent, loadServices, loadArchiveItems, loadTimelineStages } from './modules/content-loader.js';
+import { loadPageContent, loadServices, loadArchiveItems, loadTimelineStages, loadCategories } from './modules/content-loader.js';
+import { printSignature } from './modules/signature.js';
+
+printSignature();
 
 const CinemaOS = {
   S: createAppState(),
@@ -273,6 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       archiveItems: withTimeout(loadArchiveItems(), 8000),
       editContent: withTimeout(loadPageContent('edit'), 8000),
       timelineStages: withTimeout(loadTimelineStages(), 8000),
+      categories: withTimeout(loadCategories(), 8000),
     },
     {
       projects: { projects: [], error: new Error('load failed') },
@@ -283,6 +287,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       archiveItems: [],
       editContent: {},
       timelineStages: [],
+      categories: [],
     }
   );
 
@@ -294,7 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyTransmitContent(CinemaOS, results.transmit.content, results.services);
   applyArchiveContent(results.archiveContent.content, results.archiveItems);
   applyEditContent(CinemaOS, results.timelineStages, results.editContent.grader_defaults);
-  buildLenses(results.services, CinemaOS);
+  buildLenses(results.categories, window.T36.PROJECTS, CinemaOS);
 
   if (anyFailed || results.projects.error) {
     // Genuinely empty (no published projects yet) is a normal state
