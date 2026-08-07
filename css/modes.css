@@ -442,7 +442,6 @@
   .ed-bin,.ed-insp { display:none; }
   .lens-shelf { overflow-y:auto; }
   .lens-card { width:calc(50% - 2px); }
-  .lens-card.has-video .lens-play-hint { opacity: 1; background: rgba(0,0,0,.12); }
   .txg { grid-template-columns:1fr; }
   .fp-ctrls { gap:6px; padding:0 10px; }
   .tx-scr { padding:24px 20px; }
