@@ -18,6 +18,15 @@ export function switchMode(app, n) {
   const nextMode = Number(n);
   if (Number.isNaN(nextMode) || nextMode === app.S.mode) return;
 
+  // If this page's real content (and any autoplaying media) was deferred
+  // at load time, build it now, on this first actual visit — then never
+  // again, so revisiting the page doesn't rebuild/restart anything.
+  const pending = app._pendingRenders?.[nextMode];
+  if (pending) {
+    delete app._pendingRenders[nextMode];
+    pending();
+  }
+
   // Blur any focused control before switching — handles the on-screen
   // keyboard for text inputs reliably. The deeper fix for native <select>
   // pickers is in css/main.css: .page now toggles `visibility` alongside

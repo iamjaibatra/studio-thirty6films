@@ -39,10 +39,7 @@ const CinemaOS = {
     this.boot();
     this.initCursor();
     this.initToast();
-    this.buildPlayback();
     this.buildEdit();
-    this.buildLenses();
-    this.buildArchive();
     this.initModes();
     this.initShoot();
     this.initRail();
@@ -296,10 +293,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   CinemaOS.init();
   applyShootContent(CinemaOS, results.shoot.hero, results.shoot.hud);
-  applyTransmitContent(CinemaOS, results.transmit.content, results.services);
-  applyArchiveContent(results.archiveContent.content, results.archiveItems);
-  applyEditContent(CinemaOS, results.timelineStages, results.editContent.grader_defaults);
-  buildLenses(results.categories, window.T36.PROJECTS, CinemaOS);
+
+  // Everything else renders lazily, the first time the visitor actually
+  // switches to that page — see switchMode() in modules/mode.js. Nothing
+  // here does any network/media work; it just builds the DOM the moment
+  // it's needed instead of all at once on load.
+  CinemaOS._pendingRenders = {
+    1: () => initPlayback(CinemaOS),
+    2: () => applyArchiveContent(results.archiveContent.content, results.archiveItems),
+    3: () => applyEditContent(CinemaOS, results.timelineStages, results.editContent.grader_defaults),
+    4: () => buildLenses(results.categories, window.T36.PROJECTS, CinemaOS),
+    5: () => applyTransmitContent(CinemaOS, results.transmit.content, results.services),
+  };
 
   if (anyFailed || results.projects.error) {
     // Genuinely empty (no published projects yet) is a normal state
