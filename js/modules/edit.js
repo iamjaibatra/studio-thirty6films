@@ -23,6 +23,32 @@ export function buildEdit(app) {
   bindTransportControls(app);
   app.initPlayhead();
   app.initSliders();
+
+  applyPreviewAspectRatio();
+  window.removeEventListener('resize', applyPreviewAspectRatio);
+  window.addEventListener('resize', applyPreviewAspectRatio, { passive: true });
+}
+
+/**
+ * Locks the preview monitor (.ep-scr) to a consistent 16:9 ratio
+ * regardless of screen size. Without this, its height is just whatever
+ * space is left over from the surrounding flex/grid layout — on desktop
+ * that happens to land close to 16:9 because of the side panels' fixed
+ * widths, but on mobile (where the side panels are hidden entirely) the
+ * leftover shape is unrelated and can be much wider or taller, so the
+ * same object-fit:cover crop on stage media looks completely different.
+ * Setting height in JS from the real measured width sidesteps any
+ * CSS aspect-ratio/Grid timing ambiguity — same approach used to fix the
+ * equivalent issue on the Lenses page.
+ */
+function applyPreviewAspectRatio() {
+  const scr = document.getElementById('ep-scr') || document.querySelector('.ep-scr');
+  if (!scr) return;
+  const width = scr.getBoundingClientRect().width;
+  if (width > 0) {
+    scr.style.flex = '0 0 auto';
+    scr.style.height = `${width * 9 / 16}px`;
+  }
 }
 
 /**
