@@ -102,7 +102,7 @@ export async function loadTimelineStages() {
   const { data, error } = await supabase
     .from('timeline_stages')
     .select(
-      'id, label, description, stage_order, media:media_id ( url, type ), project:project_id ( title, client )'
+      'id, label, description, stage_order, media:media_id ( url, type ), media_mobile:media_mobile_id ( url, type ), project:project_id ( title, client )'
     )
     .order('stage_order', { ascending: true });
 
@@ -117,6 +117,8 @@ export async function loadTimelineStages() {
     description: row.description,
     mediaUrl: row.media?.url || null,
     mediaType: row.media?.type || null, // 'image' | 'video' | null
+    mediaMobileUrl: row.media_mobile?.url || null,
+    mediaMobileType: row.media_mobile?.type || null,
     projectTitle: row.project?.title || null,
     projectClient: row.project?.client || null,
   }));

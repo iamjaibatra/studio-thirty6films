@@ -12,6 +12,7 @@ const PROG_PER_TICK = 100 / ((PLAYBACK_SWEEP_SECONDS * 1000) / TICK_MS);
 const SCRUB_STEP_PCT = 100 / 24; // ~half a stage-width for a typical 9-stage project
 
 let currentStages = [];
+let currentApp = null;
 
 export function buildEdit(app) {
   // Setup that doesn't depend on CMS data — runs at init time regardless.
@@ -24,42 +25,12 @@ export function buildEdit(app) {
   app.initPlayhead();
   app.initSliders();
 
-  applyPreviewAspectRatio();
-  window.removeEventListener('resize', applyPreviewAspectRatio);
-  window.addEventListener('resize', applyPreviewAspectRatio, { passive: true });
+  window.removeEventListener('resize', handleEditResize);
+  window.addEventListener('resize', handleEditResize, { passive: true });
 }
 
-/**
- * Locks the preview monitor (.ep-scr) to a consistent 16:9 ratio
- * regardless of screen size. Without this, its height is just whatever
- * space is left over from the surrounding flex/grid layout — on desktop
- * that happens to land close to 16:9 because of the side panels' fixed
- * widths, but on mobile (where the side panels are hidden entirely) the
- * leftover shape is unrelated and can be much wider or taller, so the
- * same object-fit:cover crop on stage media looks completely different.
- * Setting height in JS from the real measured width sidesteps any
- * CSS aspect-ratio/Grid timing ambiguity — same approach used to fix the
- * equivalent issue on the Lenses page.
- */
-function applyPreviewAspectRatio() {
-  const scr = document.getElementById('ep-scr') || document.querySelector('.ep-scr');
-  if (!scr) return;
-
-  const isMobile = window.innerWidth <= 768;
-  if (!isMobile) {
-    // Desktop was already correct on its own — this fix should never have
-    // touched it. Clear any inline overrides so it falls back to its
-    // original, natural CSS flex sizing exactly as it was before.
-    scr.style.flex = '';
-    scr.style.height = '';
-    return;
-  }
-
-  const width = scr.getBoundingClientRect().width;
-  if (width > 0) {
-    scr.style.flex = '0 0 auto';
-    scr.style.height = `${width * 9 / 16}px`;
-  }
+function handleEditResize() {
+  if (currentStages.length && currentApp) applyStageMedia(currentStages[currentApp.S.editStage]);
 }
 
 /**
@@ -98,6 +69,7 @@ function bindTransportControls(app) {
  */
 export function applyEditContent(app, stages = [], graderDefaults = {}) {
   currentStages = stages;
+  currentApp = app;
 
   renderBin(app, stages);
   renderStageCaptions(stages);
@@ -324,11 +296,16 @@ function applyStageMedia(stage) {
   const grade = document.querySelector('.ep-grade');
   if (!grade) return;
 
-  const existing = document.getElementById('ep-stage-media');
-  const wantsVideo = stage?.mediaType === 'video';
-  const wantsImage = stage?.mediaType === 'image';
+  const isMobile = window.innerWidth <= 768;
+  const useMobileMedia = isMobile && stage?.mediaMobileUrl;
+  const effectiveUrl = useMobileMedia ? stage.mediaMobileUrl : stage?.mediaUrl;
+  const effectiveType = useMobileMedia ? stage.mediaMobileType : stage?.mediaType;
 
-  if (!stage?.mediaUrl) {
+  const existing = document.getElementById('ep-stage-media');
+  const wantsVideo = effectiveType === 'video';
+  const wantsImage = effectiveType === 'image';
+
+  if (!effectiveUrl) {
     if (existing) existing.style.display = 'none';
     return;
   }
@@ -367,7 +344,7 @@ function applyStageMedia(stage) {
     grade.insertBefore(media, grade.firstChild);
   }
 
-  if (media.src !== stage.mediaUrl) media.src = stage.mediaUrl;
+  if (media.src !== effectiveUrl) media.src = effectiveUrl;
   media.style.display = '';
 }
 
