@@ -172,7 +172,6 @@ function applyBackgroundMedia(hero) {
   const videoUrl = (isMobile && hero.background_video_mobile_url) || hero.background_video_url;
 
   if (videoUrl) {
-    gradientBg?.style.setProperty('display', 'none');
     const video = document.createElement('video');
     video.className = 'lv-real-bg';
     video.src = videoUrl;
@@ -181,6 +180,35 @@ function applyBackgroundMedia(hero) {
     video.muted = true;
     video.loop = true;
     video.playsInline = true;
+
+    // Only hide the decorative gradient once the video actually starts
+    // playing — if it never does (see error handler below), the gradient
+    // stays visible instead of leaving a blank hero section.
+    video.addEventListener('playing', () => {
+      gradientBg?.style.setProperty('display', 'none');
+    }, { once: true });
+
+    video.addEventListener('error', () => {
+      console.error(
+        `[T36] Hero background video failed to load or decode: ${videoUrl}. ` +
+          'This is the classic symptom of a codec mismatch — e.g. a video encoded as HEVC/H.265 ' +
+          '(a common default when exporting from an iPhone or Mac) plays fine on newer iPhones but ' +
+          'fails on many Android devices and older browsers. Re-export as H.264 in an .mp4 container ' +
+          'to play reliably everywhere. Falling back to the configured fallback image or gradient.'
+      );
+      video.remove();
+      if (hero.fallback_image_url) {
+        gradientBg?.style.setProperty('display', 'none');
+        const img = document.createElement('img');
+        img.className = 'lv-real-bg';
+        img.src = hero.fallback_image_url;
+        img.alt = '';
+        container.insertBefore(img, container.firstChild);
+      } else {
+        gradientBg?.style.removeProperty('display');
+      }
+    });
+
     container.insertBefore(video, container.firstChild);
   } else if (hero.fallback_image_url) {
     gradientBg?.style.setProperty('display', 'none');
