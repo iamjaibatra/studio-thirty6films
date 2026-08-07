@@ -2,6 +2,26 @@ import { supabase } from './supabase-client.js';
 
 let currentContent = { success_message: 'Transmission received.', destination_email: null };
 
+async function sendInquiryEmail(payload) {
+  const config = window.__SUPABASE_CONFIG__;
+  if (!config?.url || !config?.anonKey) throw new Error('Supabase not configured');
+
+  const res = await fetch(`${config.url}/functions/v1/transmit-email`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: config.anonKey,
+      Authorization: `Bearer ${config.anonKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Email function returned ${res.status}`);
+  }
+}
+
 export function initTransmit(app) {
   const nosig = document.getElementById('tx-nosig');
   const form = document.getElementById('tx-form');
@@ -61,6 +81,13 @@ async function handleSubmit(app, sub) {
       .from('inquiries')
       .insert([{ name, email, service, timeline, brief: briefText }]);
     if (error) throw error;
+
+    // Best-effort — the inquiry is already safely recorded above, so a
+    // temporary email hiccup (e.g. SMTP not yet configured) shouldn't
+    // block the visitor from seeing a successful submission.
+    sendInquiryEmail({ name, email, service, timeline, brief: briefText }).catch(err => {
+      console.error('[T36] Inquiry email failed to send (inquiry was still recorded):', err);
+    });
 
     clearInterval(step);
     sub.textContent = 'Transmission Complete ✓';
