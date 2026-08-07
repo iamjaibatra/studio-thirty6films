@@ -44,6 +44,17 @@ export function buildEdit(app) {
 function applyPreviewAspectRatio() {
   const scr = document.getElementById('ep-scr') || document.querySelector('.ep-scr');
   if (!scr) return;
+
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile) {
+    // Desktop was already correct on its own — this fix should never have
+    // touched it. Clear any inline overrides so it falls back to its
+    // original, natural CSS flex sizing exactly as it was before.
+    scr.style.flex = '';
+    scr.style.height = '';
+    return;
+  }
+
   const width = scr.getBoundingClientRect().width;
   if (width > 0) {
     scr.style.flex = '0 0 auto';
