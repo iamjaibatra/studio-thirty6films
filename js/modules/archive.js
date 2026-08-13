@@ -35,12 +35,28 @@ function renderContactSheet(items) {
       const video = document.createElement('video');
       video.className = 'neg-pos';
       video.src = item.mediaUrl;
-      video.autoplay = true;
       video.muted = true;
       video.loop = true;
       video.playsInline = true;
-      video.play().catch(() => {});
+      video.preload = 'none';
       neg.appendChild(video);
+
+      const io = typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                video.preload = 'metadata';
+                video.play().catch(() => {});
+                io.unobserve(neg);
+              }
+            });
+          }, { rootMargin: '200px' })
+        : null;
+      if (io) {
+        io.observe(neg);
+      } else {
+        video.play().catch(() => {});
+      }
     } else {
       const posLayer = document.createElement('div');
       if (item.mediaUrl) {

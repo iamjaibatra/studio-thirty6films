@@ -33,7 +33,7 @@ export function buildLenses(categories = [], projects = [], app) {
     let mediaHtml = '';
     if (hasVideo) {
       const posterAttr = repProject.thumbnail ? ` poster="${repProject.thumbnail}"` : '';
-      mediaHtml = `<video class="lens-vis-media" src="${repProject.video}"${posterAttr} autoplay muted loop playsinline preload="metadata"></video>`;
+      mediaHtml = `<video class="lens-vis-media" src="${repProject.video}"${posterAttr} muted loop playsinline preload="none"></video>`;
     } else if (repProject?.thumbnail) {
       mediaHtml = `<img class="lens-vis-media" src="${repProject.thumbnail}" alt="" />`;
     }
@@ -61,7 +61,22 @@ export function buildLenses(categories = [], projects = [], app) {
 
     if (hasVideo) {
       const videoEl = d.querySelector('video');
-      videoEl?.play().catch(() => {});
+      const io = typeof IntersectionObserver === 'function'
+        ? new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                videoEl.preload = 'metadata';
+                videoEl.play().catch(() => {});
+                io.unobserve(d);
+              }
+            });
+          }, { rootMargin: '200px' })
+        : null;
+      if (io) {
+        io.observe(d);
+      } else {
+        videoEl?.play().catch(() => {});
+      }
     }
 
     if (app) {

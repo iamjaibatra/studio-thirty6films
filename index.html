@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Start the connection to Supabase (data + all media) as early as
+     possible — shaves DNS/TLS setup time off the very first request,
+     since every image/video on the site is fetched from this origin. -->
+<link rel="preconnect" href="https://dtczmvbdaawnopdxqiax.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://dtczmvbdaawnopdxqiax.supabase.co">
 <meta name="description" content="Studio Thirty6 Films — Visual production house. Fashion, jewellery, brand and documentary filmmaking. New Delhi.">
 <meta name="theme-color" content="#080808">
 <link rel="canonical" href="https://studiothirty6films.com/">
