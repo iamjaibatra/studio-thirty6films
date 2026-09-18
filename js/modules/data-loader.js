@@ -61,6 +61,7 @@ export async function loadProjects() {
       poster: row.thumbnail || null,
       duration: row.duration || '—',
       year: row.year ?? '',
+      description: row.description || '',
       featured: Boolean(row.featured),
       credits: Array.isArray(row.credits) ? row.credits : [],
       spec: [row.category, row.year].filter(Boolean).join(' · ') || '—',

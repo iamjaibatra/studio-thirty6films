@@ -252,6 +252,11 @@ export function initPlayback(app) {
 
 let titleIdleTimer = null;
 
+/** Builds "CLIENT · CATEGORY · YEAR", omitting any piece that's missing. */
+function buildEyebrow(p) {
+  return [p.client, p.category, p.year].filter(Boolean).join(' · ');
+}
+
 function seekRelative(app, deltaSeconds) {
   const vid = document.getElementById('fp')?.querySelector('video');
 
@@ -305,14 +310,22 @@ export function openClip(app, idx) {
     vid.play().catch(() => {});
   }
 
-  const title = document.getElementById('fp-title');
-  if (title) title.textContent = p.title;
+  const eyebrow = document.getElementById('fp-eyebrow');
+  if (eyebrow) eyebrow.textContent = buildEyebrow(p);
+
+  const titleText = document.getElementById('fp-title-text');
+  if (titleText) titleText.textContent = p.title;
+
+  const durationEl = document.getElementById('fp-duration');
+  if (durationEl) durationEl.textContent = p.duration && p.duration !== '—' ? p.duration : '';
+
   resetTitleIdleTimer();
 
   const playBtn = document.getElementById('fp-play');
   if (playBtn) playBtn.innerHTML = ICON_PAUSE;
 
   document.getElementById('fp-info-panel')?.classList.remove('on');
+  renderDescription(p.description);
   renderCredits(p.credits);
   loadProjectGallery(p.id).then(renderGallery).catch(() => renderGallery([]));
 
@@ -362,18 +375,40 @@ export function openLightbox(app, { title, videoUrl }) {
   vid.loop = true;
   vid.play().catch(() => {});
 
-  const titleEl = document.getElementById('fp-title');
-  if (titleEl) titleEl.textContent = title || '';
+  const eyebrowEl = document.getElementById('fp-eyebrow');
+  if (eyebrowEl) eyebrowEl.textContent = '';
+
+  const titleTextEl = document.getElementById('fp-title-text');
+  if (titleTextEl) titleTextEl.textContent = title || '';
+
+  const durationEl = document.getElementById('fp-duration');
+  if (durationEl) durationEl.textContent = '';
+
   resetTitleIdleTimer();
 
   const playBtn = document.getElementById('fp-play');
   if (playBtn) playBtn.innerHTML = ICON_PAUSE;
 
   document.getElementById('fp-info-panel')?.classList.remove('on');
+  renderDescription('');
   renderCredits([]);
   renderGallery([]);
 
   app.startPlay();
+}
+
+function renderDescription(description) {
+  const el = document.getElementById('fp-description');
+  const section = document.getElementById('fp-description-section');
+  if (!el || !section) return;
+
+  if (!description) {
+    section.style.display = 'none';
+    el.textContent = '';
+    return;
+  }
+  section.style.display = '';
+  el.textContent = description;
 }
 
 function renderCredits(credits) {
