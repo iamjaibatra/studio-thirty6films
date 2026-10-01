@@ -23,6 +23,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { buildPages } = require('./pages');
 
 const SITE_URL = 'https://studiothirty6films.com';
 const STUDIO_NAME = 'Studio Thirty6 Films';
@@ -121,7 +122,7 @@ async function loadData(root) {
 
 /* ── renderers ───────────────────────────────────────── */
 
-function renderContentBlock({ projects, services, archive }) {
+function renderContentBlock({ projects, services, archive }, categoryUrl) {
   const about = [archive.studio_description_1, archive.studio_description_2].map(clean).filter(Boolean);
   const clients = clientList(projects);
 
@@ -136,16 +137,17 @@ function renderContentBlock({ projects, services, archive }) {
     .map((s) => `      <li><h3>${esc(clean(s.title))}</h3><p>${esc(clean(s.description))}</p></li>`)
     .join('\n');
 
+  const link = (url, text) => (url ? `<a href="${url}">${text}</a>` : text);
   const workHtml = [...byCategory.entries()]
     .map(([cat, list]) => {
       const items = list
         .map((p) => {
           const meta = [clean(p.client), clean(p.category), p.year].filter(Boolean).join(' · ');
           const desc = clean(p.description);
-          return `        <li><strong>${esc(clean(p.title))}</strong> — ${esc(meta)}${desc && desc !== clean(p.title) ? `. ${esc(desc)}` : ''}</li>`;
+          return `        <li><strong>${link(p._url, esc(clean(p.title)))}</strong> — ${esc(meta)}${desc && desc !== clean(p.title) ? `. ${esc(desc)}` : ''}</li>`;
         })
         .join('\n');
-      return `      <h3>${esc(cat)}</h3>\n      <ul>\n${items}\n      </ul>`;
+      return `      <h3>${link(categoryUrl && categoryUrl(cat), esc(cat))}</h3>\n      <ul>\n${items}\n      </ul>`;
     })
     .join('\n');
 
@@ -163,7 +165,7 @@ ${servicesHtml}
   </ul>
   <h2>Clients</h2>
   <p>${clients.map(esc).join(', ')}.</p>
-  <h2>Selected work</h2>
+  <h2><a href="/work/">Selected work</a></h2>
 ${workHtml}
   <h2>Contact</h2>
   <p>New Delhi, India · <a href="mailto:info@studiothirty6films.com">info@studiothirty6films.com</a> · <a href="${INSTAGRAM_URL}">Instagram @studiothirty6_films</a></p>
@@ -182,17 +184,9 @@ function renderJsonLd({ projects, services, archive }) {
     .map((p, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      item: {
-        '@type': 'VideoObject',
-        name: clean(p.title),
-        description: clean(p.description) || `${clean(p.category)} by ${STUDIO_NAME} for ${clean(p.client)}.`,
-        thumbnailUrl: p.thumbnail,
-        contentUrl: p.video,
-        uploadDate: p.created_at || undefined,
-        duration: isoDuration(p.duration),
-        genre: clean(p.category) || undefined,
-        creator: { '@id': orgId },
-      },
+      name: clean(p.title),
+      // Each film's VideoObject lives on its own watch page (/work/<slug>/).
+      url: p._url ? `${SITE_URL}${p._url}` : `${SITE_URL}/`,
     }));
 
   const graph = [
@@ -230,41 +224,39 @@ function renderJsonLd({ projects, services, archive }) {
   return `<script type="application/ld+json">\n${json}\n</script>`;
 }
 
-function renderSitemap({ projects }) {
-  const lastmod = projects
-    .map((p) => p.updated_at || p.created_at)
-    .filter(Boolean)
-    .sort()
-    .pop();
-  const videos = projects
-    .filter((p) => p.video && p.thumbnail)
-    .map((p) => {
-      const secs = seconds(p.duration);
-      const desc = clean(p.description) || `${clean(p.category)} for ${clean(p.client)}`;
-      return [
-        '    <video:video>',
-        `      <video:thumbnail_loc>${esc(p.thumbnail)}</video:thumbnail_loc>`,
-        `      <video:title>${esc(clean(p.title))}</video:title>`,
-        `      <video:description>${esc(desc.slice(0, 2048))}</video:description>`,
-        `      <video:content_loc>${esc(p.video)}</video:content_loc>`,
-        secs ? `      <video:duration>${secs}</video:duration>` : null,
-        p.created_at ? `      <video:publication_date>${esc(new Date(p.created_at).toISOString())}</video:publication_date>` : null,
-        '    </video:video>',
-      ]
-        .filter(Boolean)
-        .join('\n');
-    })
-    .join('\n');
+function renderSitemap({ projects }, pageUrls = []) {
+  const day = (d) => (d ? new Date(d).toISOString().slice(0, 10) : null);
+  const homeLastmod = projects.map((p) => p.updated_at || p.created_at).filter(Boolean).sort().pop();
+
+  const videoXml = (p) => {
+    if (!p || !p.video || !p.thumbnail) return '';
+    const secs = seconds(p.duration);
+    const desc = clean(p.description) || `${clean(p.category)} for ${clean(p.client)}`;
+    return [
+      '    <video:video>',
+      `      <video:thumbnail_loc>${esc(p.thumbnail)}</video:thumbnail_loc>`,
+      `      <video:title>${esc(clean(p.title))}</video:title>`,
+      `      <video:description>${esc(desc.slice(0, 2048))}</video:description>`,
+      `      <video:content_loc>${esc(p.video)}</video:content_loc>`,
+      secs ? `      <video:duration>${secs}</video:duration>` : null,
+      p.created_at ? `      <video:publication_date>${esc(new Date(p.created_at).toISOString())}</video:publication_date>` : null,
+      '    </video:video>',
+    ].filter(Boolean).join('\n') + '\n';
+  };
+
+  const entry = (loc, lastmod, priority, extra = '') =>
+    `  <url>\n    <loc>${SITE_URL}${loc}</loc>\n${lastmod ? `    <lastmod>${day(lastmod)}</lastmod>\n` : ''}    <priority>${priority}</priority>\n${extra}  </url>`;
+
+  const urls = [entry('/', homeLastmod, '1.0')];
+  for (const u of pageUrls) {
+    const priority = u.project ? '0.6' : u.loc === '/work/' ? '0.9' : '0.8';
+    urls.push(entry(u.loc, u.lastmod, priority, videoXml(u.project)));
+  }
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-  <url>
-    <loc>${SITE_URL}/</loc>
-${lastmod ? `    <lastmod>${new Date(lastmod).toISOString().slice(0, 10)}</lastmod>\n` : ''}    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-${videos}
-  </url>
+${urls.join('\n')}
 </urlset>
 `;
 }
@@ -283,10 +275,14 @@ async function applySeo(root, dist) {
   data.services = Array.isArray(data.services) ? data.services : [];
   data.archive = data.archive || {};
 
+  // Project/category pages first: they assign each project its _url,
+  // which the homepage block, JSON-LD and sitemap all link to.
+  const pages = buildPages(dist, data);
+
   const indexPath = path.join(dist, 'index.html');
   let html = fs.readFileSync(indexPath, 'utf8');
 
-  html = html.replace(/<!-- SEO:START -->[\s\S]*?<!-- SEO:END -->/, () => renderContentBlock(data));
+  html = html.replace(/<!-- SEO:START -->[\s\S]*?<!-- SEO:END -->/, () => renderContentBlock(data, pages.categoryUrl));
   html = html.replace('<!-- SEO:JSONLD -->', () => renderJsonLd(data));
 
   const featured = data.projects.find((p) => p.featured && p.thumbnail) || data.projects.find((p) => p.thumbnail);
@@ -298,11 +294,12 @@ async function applySeo(root, dist) {
   }
 
   fs.writeFileSync(indexPath, html);
-  fs.writeFileSync(path.join(dist, 'sitemap.xml'), renderSitemap(data));
+  fs.writeFileSync(path.join(dist, 'sitemap.xml'), renderSitemap(data, pages.urls));
 
   console.log(
     `[seo] Baked ${data.projects.length} projects, ${data.services.length} services, ` +
-      `${clientList(data.projects).length} clients into index.html + sitemap.xml.`
+      `${clientList(data.projects).length} clients into index.html; ` +
+      `${pages.urls.length} pages (${pages.categories.length} categories) + sitemap.xml.`
   );
 }
 
