@@ -194,10 +194,14 @@ function renderProject(p, ctx) {
   const title = clean(p.title);
   const client = clean(p.client);
   const desc = clean(p.description);
-  const extraDesc = desc && desc.toLowerCase() !== title.toLowerCase() ? desc : '';
-  const lead = `${title} is ${article(kind)} ${kind} produced by ${STUDIO} for ${client || 'a client'}${p.year ? ` in ${p.year}` : ''}.`;
   const sentence = (t) => (t && !/[.!?…]$/.test(t) ? `${t}.` : t);
-  const metaDescription = `${lead}${extraDesc ? ` ${sentence(extraDesc)}` : ''} Fashion, jewellery and brand film production from New Delhi.`.slice(0, 300);
+  // The CMS description leads when it says more than the title; the
+  // production credit follows, so the two never repeat each other.
+  const ownDesc = desc && desc.toLowerCase() !== title.toLowerCase() ? sentence(desc) : '';
+  const credit = `Produced by ${STUDIO} in New Delhi${client ? ` for ${client}` : ''}${p.year ? `, ${p.year}` : ''}.`;
+  const lead = ownDesc || `${title} is ${article(kind)} ${kind} produced by ${STUDIO}${client ? ` for ${client}` : ''}${p.year ? ` in ${p.year}` : ''}.`;
+  const extraDesc = ownDesc ? credit : '';
+  const metaDescription = `${lead} ${ownDesc ? credit : 'Fashion, jewellery and brand film production from New Delhi.'}`.slice(0, 300);
 
   const related = ctx.projects
     .filter((x) => x !== p && clean(x.category) === clean(p.category))
