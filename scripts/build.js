@@ -24,6 +24,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { applySeo } = require('./seo');
+const { submitIndexNow } = require('./indexnow');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
@@ -42,6 +43,7 @@ const STATIC_COPY_ITEMS = [
   'robots.txt',
   'sitemap.xml',
   'google7ea77c9fc3308f33.html', // Google Search Console ownership — keep
+  '8ba198b7cc9785c4f4c7b23c5a8a79c2.txt', // IndexNow key (scripts/indexnow.js) — keep
 ];
 
 function copyRecursive(src, dest) {
@@ -134,6 +136,7 @@ async function main() {
   fs.writeFileSync(indexPath, html);
 
   await applySeo(ROOT, DIST);
+  await submitIndexNow(DIST);
 
   console.log(`[build] Version ${version} — done → ${DIST}`);
 }
