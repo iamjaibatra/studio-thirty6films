@@ -41,6 +41,7 @@ const STATIC_COPY_ITEMS = [
   'site.webmanifest',
   'robots.txt',
   'sitemap.xml',
+  'google7ea77c9fc3308f33.html', // Google Search Console ownership — keep
 ];
 
 function copyRecursive(src, dest) {
