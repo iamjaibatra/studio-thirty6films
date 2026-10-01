@@ -23,6 +23,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { applySeo } = require('./seo');
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
@@ -104,7 +105,7 @@ function writeConfig(jsDistDir) {
   );
 }
 
-function main() {
+async function main() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.mkdirSync(DIST, { recursive: true });
 
@@ -131,7 +132,12 @@ function main() {
     .replace(/(["'])css\/modes\.css\1/, `$1css/modes.css?v=${version}$1`);
   fs.writeFileSync(indexPath, html);
 
+  await applySeo(ROOT, DIST);
+
   console.log(`[build] Version ${version} — done → ${DIST}`);
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
