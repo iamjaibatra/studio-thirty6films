@@ -441,6 +441,7 @@
 .txg-t { resize:none; height:64px; }
 .tx-actions { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding-top:5px; }
 .tx-info { font-family:'JetBrains Mono',monospace; font-size:7.5px; color:var(--t3); letter-spacing:.05em; line-height:2; }
+.tx-info { max-width: 62%; }
 .tx-info a { color:var(--t2); text-decoration:none; transition:color .14s; cursor:none; }
 .tx-info a:hover { color:var(--t1); }
 .tx-sub { display:inline-flex; align-items:center; gap:7px; padding:10px 22px; background:var(--red); color:#f4f4f4; font-family:'JetBrains Mono',monospace; font-size:8px; font-weight:500; letter-spacing:.12em; text-transform:uppercase; border:none; cursor:none; transition:opacity .14s; }

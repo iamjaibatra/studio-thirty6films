@@ -141,8 +141,21 @@ export function applyTransmitContent(app, content = {}, services = []) {
     emailLink.href = `mailto:${content.email}`;
   }
 
+  const phoneLink = document.getElementById('tx-phone-link');
+  if (phoneLink) {
+    if (content.phone) {
+      phoneLink.textContent = content.phone;
+      phoneLink.href = `tel:${content.phone.replace(/[^\d+]/g, '')}`;
+      phoneLink.parentElement.hidden = false;
+    } else {
+      phoneLink.parentElement.hidden = true;
+    }
+  }
+
+  // Full street address when the CMS has one (page_content transmit.address),
+  // otherwise the short location line ("New Delhi · India").
   const location = document.getElementById('tx-location');
-  if (location) location.textContent = content.location || '';
+  if (location) location.textContent = content.address || content.location || '';
 
   const serviceSelect = document.getElementById('tx-service');
   if (serviceSelect) {

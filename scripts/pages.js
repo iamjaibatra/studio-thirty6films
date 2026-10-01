@@ -17,7 +17,6 @@ const path = require('path');
 
 const SITE_URL = 'https://studiothirty6films.com';
 const STUDIO = 'Studio Thirty6 Films';
-const EMAIL = 'info@studiothirty6films.com';
 const INSTAGRAM = 'https://www.instagram.com/studiothirty6_films/';
 const FONTS = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap';
 
@@ -162,12 +161,13 @@ function breadcrumbs(items) {
   return { html: `<nav class="crumbs" aria-label="Breadcrumb">${html}</nav>`, ld: jsonLd(ld) };
 }
 
-function footer(categories) {
+function footer(categories, contact) {
   return `<footer class="foot">
   <div class="foot-cta">
     <p class="eyebrow">Transmit</p>
     <p class="foot-h">Let's make something <strong>worth watching.</strong></p>
-    <p><a class="mail" href="mailto:${EMAIL}">${EMAIL}</a></p>
+    <p><a class="mail" href="mailto:${esc(contact.email)}">${esc(contact.email)}</a></p>
+    <p class="addr"><a href="tel:${esc(contact.tel)}">${esc(contact.phone)}</a><br>${esc(contact.address)}</p>
   </div>
   <div class="foot-cols">
     <div><p class="eyebrow">Work</p>${categories.map((c) => `<a href="/${c.slug}/">${esc(c.h1)}</a>`).join('')}</div>
@@ -275,7 +275,7 @@ ${topbar(cat.slug, ctx.categories)}
     <p><a class="os-link" href="/${cat.slug}/">All ${esc(cat.h1.toLowerCase())} <span aria-hidden="true">→</span></a></p>
   </section>` : ''}
 </main>
-${footer(ctx.categories)}
+${footer(ctx.categories, ctx.contact)}
 </body>
 </html>
 `;
@@ -327,7 +327,7 @@ ${topbar(cat.slug, ctx.categories)}
   </header>
   <div class="grid">${list.map((p, i) => card(p, { eager: i < 4 })).join('\n')}</div>
 </main>
-${footer(ctx.categories)}
+${footer(ctx.categories, ctx.contact)}
 </body>
 </html>
 `;
@@ -370,7 +370,7 @@ ${sections}
     <ul>${ctx.projects.map((p) => `<li><a href="${p._url}">${esc(clean(p.title))}</a> <span>${esc([clean(p.client), p.year].filter(Boolean).join(' · '))}</span></li>`).join('')}</ul>
   </section>
 </main>
-${footer(ctx.categories)}
+${footer(ctx.categories, ctx.contact)}
 </body>
 </html>
 `;
@@ -429,7 +429,7 @@ function buildPages(dist, data) {
     }
   }
 
-  const ctx = { projects, services: data.services || [], byCategory, categories, titleSuffix };
+  const ctx = { projects, services: data.services || [], byCategory, categories, titleSuffix, contact: data.contact };
   const write = (rel, html) => {
     const file = path.join(dist, rel, 'index.html');
     fs.mkdirSync(path.dirname(file), { recursive: true });
