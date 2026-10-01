@@ -231,6 +231,25 @@ body.c-zoom   #cur-ring { width:20px; height:20px; border-radius:50%; border-col
   height: 1px; background: var(--red);
 }
 
+/* Link out to the static film index — same metrics as .mode-tab, set
+   apart by a hairline divider and a slightly brighter label. */
+.mode-link {
+  font-family:'JetBrains Mono',monospace; font-size:9px;
+  letter-spacing:.1em; color:var(--t2);
+  padding: 0 13px; height: var(--shell-top);
+  display: flex; align-items: center; gap: 5px;
+  text-transform: uppercase; text-decoration: none;
+  position: relative; white-space: nowrap;
+  transition: color .12s;
+}
+.mode-link::before {
+  content: ''; position: absolute; left: 0; top: 50%;
+  width: 1px; height: 12px; margin-top: -6px; background: var(--line);
+}
+.mode-link:hover { color: var(--t1); }
+.mode-link span { color: var(--red); transition: transform .2s; }
+.mode-link:hover span { transform: translate(1px, -1px); }
+
 #mobile-menu-btn{
     display:none;
 }
@@ -528,6 +547,15 @@ body.gleak #vp::after {
     text-align:left;
     font-size:15px;
 }
+.mode-link{
+    width:100%;
+    height:auto;
+    padding:18px 0;
+    font-size:15px;
+    margin-top:12px;
+    border-top:1px solid rgba(255,255,255,.08);
+}
+.mode-link::before{ display:none; }
 
 #topbar{
     display:flex;

@@ -30,7 +30,7 @@ export function initCursor(app) {
   bind('.lens-card', 'focus');
   bind('.hs-ctrl', 'grab');
   bind('.sl-track', 'grab');
-  bind('.mode-tab,.pf,.r-btn,.fp-btn,.epc,.tl-t,.tx-k,.sh-close,.r-btn-i', 'zoom');
+  bind('.mode-tab,.mode-link,.pf,.r-btn,.fp-btn,.epc,.tl-t,.tx-k,.sh-close,.r-btn-i', 'zoom');
   bind('.neg', 'zoom');
   bind('.txg-i,.txg-s,.txg-t', 'text');
 }
