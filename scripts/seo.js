@@ -35,6 +35,28 @@ const NOTABLE_CLIENTS = ['Vogue', 'Bvlgari', 'Bose', 'Kiko Milano', 'Tira', 'Ama
 
 const MAX_JSONLD_VIDEOS = 30;
 
+/* Fallback contact details; the live values come from the CMS
+ * (page_content transmit/content: email, phone, address). */
+const CONTACT_FALLBACK = {
+  email: 'info@studiothirty6films.com',
+  phone: '+91 99992 21822',
+  address: 'Laxmi Garden, Plot No. 15, Opposite Metro Pillar No. 337, Kirti Nagar, New Delhi, Delhi 110015',
+};
+
+function contactFrom(transmit = {}) {
+  const c = {
+    email: clean(transmit.email) || CONTACT_FALLBACK.email,
+    phone: clean(transmit.phone) || CONTACT_FALLBACK.phone,
+    address: clean(transmit.address) || CONTACT_FALLBACK.address,
+  };
+  c.tel = c.phone.replace(/[^\d+]/g, '');
+  // "…, Kirti Nagar, New Delhi, Delhi 110015" → street + postcode for schema.org
+  const postal = /\b(\d{6})\b/.exec(c.address);
+  c.postalCode = postal ? postal[1] : undefined;
+  c.street = c.address.split(/,\s*New Delhi\b/i)[0].trim();
+  return c;
+}
+
 /* ── helpers ─────────────────────────────────────────── */
 
 function esc(s) {
@@ -106,23 +128,30 @@ async function loadData(root) {
   const fixtures = process.env.SEO_FIXTURE_DIR;
   if (fixtures) {
     const read = (f) => JSON.parse(fs.readFileSync(path.join(fixtures, f), 'utf8'));
-    return { projects: read('projects.json'), services: read('services.json'), archive: read('archive.json') };
+    const optional = (f) => (fs.existsSync(path.join(fixtures, f)) ? read(f) : {});
+    return { projects: read('projects.json'), services: read('services.json'), archive: read('archive.json'), transmit: optional('transmit.json') };
   }
 
   const cfg = readSupabaseConfig(root);
   if (!cfg) throw new Error('no Supabase config');
 
-  const [projects, services, archiveRows] = await Promise.all([
+  const [projects, services, archiveRows, transmitRows] = await Promise.all([
     rest(cfg, 'projects?select=title,slug,client,category,year,description,thumbnail,video,duration,featured,created_at,updated_at,display_order&published=eq.true&order=display_order.asc.nullslast'),
     rest(cfg, 'services?select=title,description,display_order&enabled=eq.true&order=display_order.asc'),
     rest(cfg, 'page_content?select=content&page=eq.archive&section=eq.content&limit=1'),
+    rest(cfg, 'page_content?select=content&page=eq.transmit&section=eq.content&limit=1'),
   ]);
-  return { projects, services, archive: (archiveRows[0] && archiveRows[0].content) || {} };
+  return {
+    projects,
+    services,
+    archive: (archiveRows[0] && archiveRows[0].content) || {},
+    transmit: (transmitRows[0] && transmitRows[0].content) || {},
+  };
 }
 
 /* ── renderers ───────────────────────────────────────── */
 
-function renderContentBlock({ projects, services, archive }, categoryUrl) {
+function renderContentBlock({ projects, services, archive, contact }, categoryUrl) {
   const about = [archive.studio_description_1, archive.studio_description_2].map(clean).filter(Boolean);
   const clients = clientList(projects);
 
@@ -168,12 +197,12 @@ ${servicesHtml}
   <h2><a href="/work/">Selected work</a></h2>
 ${workHtml}
   <h2>Contact</h2>
-  <p>New Delhi, India · <a href="mailto:info@studiothirty6films.com">info@studiothirty6films.com</a> · <a href="${INSTAGRAM_URL}">Instagram @studiothirty6_films</a></p>
+  <p>${esc(contact.address)} · <a href="tel:${esc(contact.tel)}">${esc(contact.phone)}</a> · <a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a> · <a href="${INSTAGRAM_URL}">Instagram @studiothirty6_films</a></p>
 </section>
 <!-- SEO:END -->`;
 }
 
-function renderJsonLd({ projects, services, archive }) {
+function renderJsonLd({ projects, services, archive, contact }) {
   const orgId = `${SITE_URL}/#organization`;
   const about = [archive.studio_description_1, archive.studio_description_2].map(clean).filter(Boolean).join(' ');
 
@@ -199,9 +228,17 @@ function renderJsonLd({ projects, services, archive }) {
       logo: `${SITE_URL}/favicon-512x512.png`,
       image: (projects.find((p) => p.featured) || projects[0] || {}).thumbnail,
       description: about || undefined,
-      email: 'info@studiothirty6films.com',
+      email: contact.email,
+      telephone: contact.tel,
       foundingDate: '2018',
-      address: { '@type': 'PostalAddress', addressLocality: 'New Delhi', addressRegion: 'Delhi', addressCountry: 'IN' },
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: contact.street,
+        addressLocality: 'New Delhi',
+        addressRegion: 'Delhi',
+        postalCode: contact.postalCode,
+        addressCountry: 'IN',
+      },
       areaServed: ['India', 'Worldwide'],
       knowsAbout: services.map((s) => clean(s.title)),
       sameAs: [INSTAGRAM_URL],
@@ -274,6 +311,7 @@ async function applySeo(root, dist) {
   data.projects = Array.isArray(data.projects) ? data.projects : [];
   data.services = Array.isArray(data.services) ? data.services : [];
   data.archive = data.archive || {};
+  data.contact = contactFrom(data.transmit);
 
   // Project/category pages first: they assign each project its _url,
   // which the homepage block, JSON-LD and sitemap all link to.
