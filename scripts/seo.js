@@ -23,11 +23,10 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { buildPages } = require('./pages');
+const { buildPages, PROFILES } = require('./pages');
 
 const SITE_URL = 'https://studiothirty6films.com';
 const STUDIO_NAME = 'Studio Thirty6 Films';
-const INSTAGRAM_URL = 'https://www.instagram.com/studiothirty6_films/';
 
 /* Brands the studio has shot for that aren't (yet) published as projects
  * in the CMS. Kept here so the client list never loses them. */
@@ -188,6 +187,7 @@ function renderContentBlock({ projects, services, archive, contact }, categoryUr
 <section id="seo" class="seo-only" aria-label="About ${STUDIO_NAME}">
   <h1>${STUDIO_NAME} — Fashion, Jewellery &amp; Brand Film Production House in New Delhi</h1>
 ${about.map((p) => `  <p>${esc(p)}</p>`).join('\n')}
+  <p><a href="/about/">About the studio</a> · <a href="/work/">All work</a> · <a href="/contact/">Contact</a></p>
 ${stats ? `  <p>${stats}.</p>\n` : ''}  <h2>Services</h2>
   <ul>
 ${servicesHtml}
@@ -197,7 +197,7 @@ ${servicesHtml}
   <h2><a href="/work/">Selected work</a></h2>
 ${workHtml}
   <h2>Contact</h2>
-  <p>${esc(contact.address)} · <a href="tel:${esc(contact.tel)}">${esc(contact.phone)}</a> · <a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a> · <a href="${INSTAGRAM_URL}">Instagram @studiothirty6_films</a></p>
+  <p>${esc(contact.address)} · <a href="tel:${esc(contact.tel)}">${esc(contact.phone)}</a> · <a href="mailto:${esc(contact.email)}">${esc(contact.email)}</a> · ${PROFILES.map((p) => `<a href="${p.url}">${p.name}</a>`).join(' · ')}</p>
 </section>
 <!-- SEO:END -->`;
 }
@@ -241,7 +241,7 @@ function renderJsonLd({ projects, services, archive, contact }) {
       },
       areaServed: ['India', 'Worldwide'],
       knowsAbout: services.map((s) => clean(s.title)),
-      sameAs: [INSTAGRAM_URL],
+      sameAs: PROFILES.map((p) => p.url),
     },
     {
       '@type': 'WebSite',
