@@ -21,6 +21,8 @@ const INSTAGRAM = 'https://www.instagram.com/studiothirty6_films/';
 
 /* The studio's official profiles elsewhere. Listed as schema.org sameAs and
  * in every footer so search engines tie them to one business. */
+const FOUNDER = 'Gimmy Kohli';
+
 const PROFILES = [
   { name: 'Instagram', url: INSTAGRAM },
   { name: 'YouTube', url: 'https://www.youtube.com/@StudioThirty6Films' },
@@ -490,7 +492,7 @@ function renderAbout(ctx) {
     ctx.stats.brands && `${ctx.stats.brands} brand partners`,
     ctx.stats.countries && `${ctx.stats.countries} countries`,
   ].filter(Boolean);
-  const description = `${STUDIO} is a fashion, jewellery and brand film production house in Kirti Nagar, New Delhi, founded in 2018${statLine.length ? ` — ${statLine.join(', ')}` : ''}. Clients include ${clients.slice(0, 6).join(', ')}.`;
+  const description = `${STUDIO} is a fashion, jewellery and brand film production house in Kirti Nagar, New Delhi, founded in 2018 by ${FOUNDER}${statLine.length ? ` — ${statLine.join(', ')}` : ''}. Clients include ${clients.slice(0, 6).join(', ')}.`;
   const crumbs = breadcrumbs([{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]);
   const ld = {
     '@context': 'https://schema.org',
@@ -520,6 +522,10 @@ ${topbar('about', ctx.categories)}
     ${about.map((p, i) => `<p${i === 0 ? ' class="lede"' : ''}>${esc(p)}</p>`).join('\n    ')}
   </header>
   ${statLine.length ? `<ul class="stats">${statLine.map((s) => { const [n, ...rest] = s.split(' '); return `<li><strong>${esc(n)}</strong> ${esc(rest.join(' '))}</li>`; }).join('')}</ul>` : ''}
+  <section class="prose">
+    <h2>Founder</h2>
+    <p>${STUDIO} was founded in 2018 by director and cinematographer ${FOUNDER}. His work includes <a href="/work/max-urbn-alaya-f/">How New Is Your Now</a>, a campaign film for Max Urb_n with Alaya F, which he directed and shot.</p>
+  </section>
   <section class="prose">
     <h2>What we make</h2>
     <p>${STUDIO} makes fashion campaigns, jewellery films, brand films, editorials, beauty campaigns, celebrity shoots, product films and reels for fashion, jewellery, beauty and lifestyle brands. Direction, production and post-production are handled in-house from the studio in Kirti Nagar, New Delhi.</p>
@@ -678,4 +684,4 @@ function latest(list) {
   return list.map((p) => p.updated_at || p.created_at).filter(Boolean).sort().pop();
 }
 
-module.exports = { buildPages, categoryPage, PROFILES };
+module.exports = { buildPages, categoryPage, PROFILES, FOUNDER };

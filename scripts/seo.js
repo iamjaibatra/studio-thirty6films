@@ -23,7 +23,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { buildPages, PROFILES } = require('./pages');
+const { buildPages, PROFILES, FOUNDER } = require('./pages');
 
 const SITE_URL = 'https://studiothirty6films.com';
 const STUDIO_NAME = 'Studio Thirty6 Films';
@@ -231,6 +231,7 @@ function renderJsonLd({ projects, services, archive, contact }) {
       email: contact.email,
       telephone: contact.tel,
       foundingDate: '2018',
+      founder: { '@type': 'Person', name: FOUNDER, jobTitle: 'Founder, Director & Cinematographer' },
       address: {
         '@type': 'PostalAddress',
         streetAddress: contact.street,
